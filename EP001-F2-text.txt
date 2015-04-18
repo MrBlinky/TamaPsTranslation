@@ -1,0 +1,554 @@
+﻿;Tamagotchi P's text patch script by Mr.Blinky April/May 2014
+;-------------------------------------------------------------
+
+;script for patch: EP001-F2 (Firmware V2 / VER56 2013-01-06)
+
+;revision: 4
+
+;Script Info:
+;------------
+
+;script file format must be UTF-8 (when non ASCII characters are used)
+;Use ';' (semicolon) for remarks
+
+;syntax (without the semicolon):
+
+;02000000:   Set current rom address to 02000000 hexadecimal
+;8,"TEXT"    First zero out 8 bytes at current address and then write string at current address
+;00          write byte 00 at current address
+;0000        write (half)word at current address
+;00000000    write long (word) at current address
+;00 0000 00  write byte, (half)word, byte at current address
+;R7=02000000 store 6 byte instruction xld.w r7,02000000 (any register r0..r14 can be used)
+
+;Note: all numbers are hexadecimal except the length number of strings
+
+;Use any of the folowing characters in strings:
+; hiragana: あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやゆよらりるれろわをんぁぃぅぇぉっゃゅょがぎぐげござじずぜぞだぢづでどばびぶべぼぱぴぷぺぽ
+; katakana: アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲンァィゥェォッャュョガギグゲゴザジズゼゾダヂヅデドバビブベボパピプペポ
+; symbols:  ー～…､｡()｢｣.・!?&◯☓♥☼★@♪╬↑↓→←$
+; numbers:  0123456789
+; roman:    ABCDEFGHIJKLMNOPQRSTUVWXYZi_
+; special:  use 'ー' for hyphen
+;           use '<' for new line
+;           use '#' for end of text (normally not required as strings are zeroed out first)
+
+;NOTE: using any other character then those above will result in a 0 terminator being used.
+
+;=======================================
+;POWER UP
+;=======================================
+
+;reform buy
+
+;erase game data confirm dialog V
+2557970: 8,"SURE?" ;ほんとうに? are you sure?
+2557978: 4,"YES"   ;はい yes
+255797c: 4,"NO"    ;いいえ no
+
+;initializing message V
+2557980: 8,"PLEASE" ;ちょっと please (text is automatically centered)
+2557988: 8,"WAIT"   ;まってね wait
+
+;power up menu V
+2557990: 8,"RESUME" ;つづきから  resume play
+2557998: 8,"RESET"  ;データをけす erase game data
+
+;no room for item dialog V
+2520294: 82           ;fix string length to 8 chars
+25579a0: 8,"ITEMLIST" ;アイテムが Items    
+25579a8: 8,"IS FULL"  ;いっぱいだよ is full    
+25579b0: 8,"PICK ONE" ;どれをけすか erase which
+25579b8: 8,"TO ERASE" ;えらんでね I choose    
+25202a0: 6D07		  ;xpos 16 align ITEMLIST
+25202C8: 6D67         ;xpos 22 align IS FULL
+25202F0: 6D07         ;xpos 16 align PICK ONE
+252031C: 6D07		  ;xpos 16 align TO ERASE
+
+;reset time warning (centered text) V
+254C844: 12,"MAKE SURE" ;とけいのじかんが 	watch time
+254C850:  8,"YOU SET"   ;あっているか		are correct
+254C858: 12,"THE TIME!" ;かくにんしてね!		sure
+
+;sound options menu V
+254c834: 8,"SOUND" ;サウンド sound
+254C83C: 4,"ON"   ;オン  on
+254C840: 4,"OFF"  ;オフ  off
+
+;------------------------------------------------
+;input player name english character code patch V
+;------------------------------------------------
+
+;(rewritten and optimized to allow code for alpha characters)
+
+252562E:     ;r4 = button state      ;char range = 01-C6, E0-F9
+
+ 5045        ;ld.w     %r5,[%sp+0x4] ;2 get name char position
+ c04c 6cb6   ;xld.w    %r6,0x130b    ;4 player name
+ 2265        ;add      %r5,%r6       ;2 point to selected char
+ 2456        ;ld.ub    %r6,[%r5]     ;2 get char
+ 7044        ;and      %r4,0x4       ;2 test C button
+ 180b        ;jreq     0xb 			 ;2 jump decrement char
+;inc_char:   ;-----------------------(20)
+ 6016        ;add      %r6,0x1       ;2 inc char
+ c003 6876   ;xcmp     %r6,0xc7      ;4 test first invalid
+ 1a02        ;jrne     0x2           ;2 skip 
+ 6196        ;add      %r6,0x19      ;2 point to A char
+;skip:                                
+ c003 6b96   ;xcmp     %r6,0xf9      ;4 last alpha
+ 0e0c        ;jrle     0xc           ;2 store, no char wrap
+;wrap:                                
+ 6c16        ;ld.w     %r6,0x1       ;2 wrap around to 1st char
+ 1e0a        ;jp       0xa           ;2 store
+;dec_char:   ;-----------------------(22)
+ 6416        ;sub      %r6,0x1       ;2 dec char
+ 0e06        ;jrle     0x6           ;2 wrap to last char
+ c003 69f6   ;xcmp      %r6,0xdf     ;4 1st invalid char
+ 1a05        ;jrne     0x5           ;2 skip to store
+ 6596        ;sub      %r6,0x19      ;2 point to last symbol
+ 1e03        ;jp       0x3           ;2 store
+;wraplast:                            
+ c003 6f96   ;xld.w     %r6,0xf9     ;4 last char Z
+;store:                               
+ 3456        ;ld.b     [%r5],%r6     ;2 store new char
+ 1e07        ;jp       0x7           ;2 continue at 0x2525672
+;            ;[skip 12 bytes old code]
+
+;=======================================
+;stats icon
+;=======================================
+
+;profile - gender text V
+2558444: 8,"GIRL" ;おんなのこ  girl
+255844C: 8,"BOY"  ;おとこのこ  boy
+
+;profile - zodiac (code supports 7 printable chars) V
+255845c: 12,"ARIES"    ;おひつじざ aries
+2558468: 12,"TAURUS"   ;おうしざ   Taurus
+2558474: 12,"GEMINI"   ;ふたござ   Gemini
+2558480: 12,"CANCER"   ;かにざ    Cancer
+255848C: 12,"LEO"      ;ししざ    Leo
+2558498: 12,"VIRGO"    ;おとめざ   Virgo
+25584A4: 12,"LIBRA"    ;てんびんざ Libra
+25584B0: 12,"SCORPIO"  ;さそりざ   Scorpio
+25584BC: 12,"SAGITT…"  ;いてざ    Sagitt...
+25584C8: 12,"CAPRIC…"  ;やぎざ    Capric...
+25584D4: 12,"AQUARI…"  ;みずがめざ Aquari...
+25584E0: 12,"PISCES"   ;うおざ    pisces
+
+;profile not set text V
+25586b8:  8,"PROFILE"  ;プロフィール   (1)profile
+25586C0:  8,"PAGE 1"   ;1ページめを  (2)first page
+25586C8: 12,"NOT SET!" ;とうろくしてね! (3)register
+25586D4:  8,"PAGE 2"   ;2ページめを  (2)2ndpage
+
+;icon backgrounds (max 8 chars) V
+25537B8: 12,"NORMAL"   ;ノーマルアイコン normal icon
+25537C4:  8,"PRINCESS" ;ひめキラ      princess kira
+25537CC:  8,"STAR"     ;ながれぼし    shooting star
+25537D4:  8,"BALLOON"  ;ふうせん      balloon
+  
+;settings V
+2555410:  8,"TIME"    ;じかんせってい  time settings
+2555418: 12,"SOUND"   ;サウンドせってい sound settigns
+2555424: 12,"DISPLAY" ;あかるさせってい brightness
+
+;=======================================
+;food icon
+;=======================================
+
+;fridge menu title V
+2549658: 8,"FRIDGE" ;れいぞうこ fridge
+2549660: 8,"♪CAFE♪" ;♪カフェ♪  music cafe
+
+;V
+254add4: 8,"TOYS" ;おどうぐ toys
+
+;V
+254ADE0: 8,"CLOTHES"  ;ようふく     outfit
+254ADE8: 8,"ACCESSO…" ;アクセサリー  accessories
+254ADF0: 8,"FRIDGE"    ;れいぞうこ   fridge
+254ADF8: 8,"FUNMAIL" ;ハッピーメール happy mail
+
+;V
+254d634: 8,"TOYS"     ;おどうぐ    toys
+254D63C: 8,"CLOTHES"  ;ようふく     outfit
+254D644: 8,"FRIDGE"   ;れいぞうこ   fridge
+254D64C: 8,"ACCESSO…" ;アクセサリー  accesories
+
+;V
+2557a1c: 8,"FRIDGE" ;れいぞうこ fridge
+
+;V
+25495b0: 8,"MEALS" ;レストラン    restaurant
+25495B8: 8,"RICE"  ;たまともごはん tamatomo rice
+
+;eat title,yes/no/erase option menu V
+2549718: 8,"EAT?"  ;たべる? eat?
+254C8E4: 4,"YES"   ;はい  yes
+254C8E8: 4,"NO"    ;いいえ no
+254C8EC: 6,"ERASE" ;けす  erase
+
+;option menu V
+254AF28: 8,"USE?" ;つかう? use it?
+254AF30: 4,"YES"  ;はい   yes
+254AF34: 4,"NO"   ;いいえ	 no
+;254AF38: 4,"ERA" ;けす   erase (relocated)
+24049AE: R4=254C8EC ;relocated 254AF38 
+
+;outdoor bus 2 line text balloon V
+2537018: 12,"HELLO! WANT" ;こんにちは!おいしい    HELLO! WANT
+2537024: 16,"SOME FOOD?"  ;おやつやごはんはいかが? SOME FOOD?
+
+;restaurant 5 char text balloon V
+2537034: 8,"GOOD!" ;おめでとう congrats! alternative
+ 
+;tama cook 2 line balloon text V
+253703C: 16,"WELCOME♪WHAT"    ;いらっしゃいっちゅうか､ (wrong context cnage in EP002 change in EP002 to Welcome Take a Seat)
+253704C: 12,"DO YOU EAT?" ;ちゅうもんはなにかな?
+
+;cafe mama 2 line text balloon V
+2537058: 12,"OH, WELCOME♪" ;あら､いらっしゃい♪ (wrong unsupported , change in EP002)
+2537064: 12,"COME IN!"     ;なにがいいかしら?
+ 
+;restaurant 2 line text balloon V
+2537070:  8,"HAPPY"       ;たんじょうび
+2537078: 12,"BIRTHDAY!!!" ;おめでと～!!!
+
+;=======================================
+;Toilet icon
+;=======================================
+
+;bath room strings and table V
+2537398: 12,"BATHROOM" ;おふろ  bathroom (over writes toilet)
+25373a4: 0254D554 ;relocated toilet (see below)
+25373ac: 02537398 ;relocated bathroom
+
+;room background list 1 V
+254D544: 8,"LIVING"  ;リビング  living
+254D54C: 8,"KITCHEN" ;キッチン  kitchen
+254D554: 8,"TOILET"  ;トイレ   toilet (over writes bathroom below)
+;                    ;おふろ	bathroom (relocated)
+254D55C: 8,"BEDROOM" ;しんしつ bedroom
+254d588: 02537398 ;relocated bathroom
+
+;room background list 2 V
+2557734: 8,"LIVING"  ;リビング  living
+255773C: 8,"KITCHEN" ;キッチン  kitchen
+2557744: 8,"TOILET"  ;トイレ  toilet (note over writes BATH)
+;2557748                   (relocated bathroom)
+255774C: 8,"BEDROOM" ;しんしつ bedroom
+2557778: 02537398 ;relocated bathroom
+
+;=======================================
+;Door icon
+;=======================================
+
+;misc destination option strings V
+2411a5c: 6C84          ;set tamadepa length to 8 chars
+254d468: 12,"BUD☼PARK" ;つぼみ☼こうえん   tsubomi park
+254D474:  8,"TAMADEPA" ;たまデパ       tamadepa
+254D47C: 12,"TAMAMORI" ;たまもりショップ   tamamori shop
+254D488:  8,"♪CAFE♪"   ;♪カフェ♪      cafe
+
+;door menu options V
+2552564: 12,"BUD☼PARK" ;つぼみ☼こうえん   tsubomi park
+2552570:  8,"TAMADEPA" ;たまデパ        tamadepa
+2552578: 12,"TAMAMORI" ;たまもりショップ    tamamori shop
+2552584:  8,"♪CAFE♪"   ;♪カフェ♪        cafe
+
+;door list (max 8 chars) V
+2553398:  8,"GAMES"    ;ゲームセンター   game center [arcade]
+25533A0: 12,"REFORM"   ;ごっちリフォーム   gotchi reform [reform]
+25533AC:  8,"PAINT"    ;ぺいんとるーむ   paint room [artclass]
+25533B4: 12,"SCHOOL"   ;ドリームスクール  dream school [school]
+25533C0: 12,"DATING"   ;おみあいパーティ match making/mary [dating]
+25533CC:  8,"ECOTOWN"  ;エコタウン      eco towm  [eco town]
+25533D4:  8,"BASE"     ;ひみつきち     secret base  [base]
+25533DC:  8,"FUNPARK"  ;ゆうえんち      Amusement park [funpark]
+25533E4:  8,"BEACH"    ;ドリームビーチ   Dream beach  [beach]
+25533EC:  8,"FOUNTAIN" ;ゆめみのいずみ  Dream spring [Fountain]
+25533F4:  8,"OUTLOOK"  ;てんぼうだい    Dai outlook [outlook]
+
+;go game center option menu V
+254D490: 12,"TO GAMES?" ;ゲームセンターに game center
+254D49C:  4,"YES"       ;いく          go
+254D4A0:  8,"NO"        ;いかない      don't go
+
+;game center owner text V
+2537144: 12,"PLAY GAMES &" ;ゲームいろいろ! play games &
+2537150: 16,"GET POINTS!" ;ごっちポイントゲットよ! get points!	
+
+;to gotchi reform V
+254D5A0: 12,"TO REFORM" ;ごっちリフォームに to gotchi reform
+254D5AC: 12,"REFORM?"   ;リフォームする?  reform?
+25578D0: 12,"REFORM?"   ;リフォームする? reform?
+
+;reform salesman text V
+2537124: 16,"BUONGIORNO!"  ;ボン・ジョールノ!ステキ  BUONGIORNO!
+2537134: 16,"LETS REFORM!" ;なリフォームはいかが～! LETS REFORM!
+
+;paint tama 2 line text balloon text V
+253722C: 12,"YOU COLORFUL" ;してあげちゃうまる@ (line2)
+2537238: 12,"LETS PAINT"   ;みんなカラフルに   (line1)
+
+;paint schemes (fixed length of 5 chars) V
+2553748: 5,"BASIC"  ;モダン   modern
+255374D: 5,"PASTE" ;パステル  pastel
+2553752: 5,"FRESH"  ;フレッシュ fresh
+2553757: 5,"NEON"   ;ネオン   neon
+255375C: 8,"CUTE"   ;ラブリー  lovely
+
+;paint option menu V
+25537A4: 8,"PAINT?" ;ぺいんとする? paint?
+25537AC: 4,"YES"    ;する       Make
+25537B0: 4,"NO"     ;しない      Not
+
+;tamadepa 2 line balloon text V
+2537304: 12,"WELCOME♪ MAY" ;いらっしゃいませ～♪   
+2537310: 12,"I HELP YOU?♥" ;たまデパへようこそ～♥ 
+
+;tamamori 2 line text balloon V
+25370DC: 12,"WELCOME ★"     ;タリのものがあるわよ♪ (wrong! this is line2 fix in EP002,remove space in this line)
+25370E8: 12,"TAKE A LOOK♪" ;ようこそ★あなたにピッ (Wrong! this is line 1  fix in EP002)
+
+;buy option menu V
+2557d80: 8,"BUY?" ;おかいあげ? purchase ?
+2557d88: 4,"YES"  ;はい yes
+2557d8c: 4,"NO"   ;いいえ no
+
+;sell option menu V
+254DAB0: 8,"SELL?" ;なにかうる? sell?
+254DAB8: 4,"YES"   ;はい	     yes
+254DABC: 4,"NO"    ;いいえ     no
+
+;buy option menu V
+254DAC0: 8,"BUY?"  ;おかいあげ? buy?
+
+;leave school option menu V
+2552550: 8,"LEAVE?" ;どうする?	what do you do?
+2552558: 4,"YES"    ;かえる
+255255C: 8,"NO"     ;かえらない
+
+;school intro text V
+2537244: 16,"HURRY! CLASS" ;さあいそいで!じゅぎょう
+2537254: 12,"IS STARTING!" ;がはじまるよ～!
+
+;leave at daycare(school) option V
+2552864: 8,"DAYCARE"  ;あずける? 
+255286C: 8,"1HR 50$" ;1じかん50$	
+
+;stay at school option V
+2552874: 8,"JOIN A" ;じゅぎょうを classes
+255287C: 8,"CLASS?" ;うける?	recieve?
+
+;tamamori options V
+2557d58: 8,"CLOTHES"  ;ようふく outfit
+2557d60: 8,"ACCESSO…" ;アクセサリー Accessories
+
+;to shop option menu V
+254D520: 12,"TO SHOP? ;たまもりショップに to tamamori shop
+
+;tamamori buy options V
+254D52C: 8,"BUY?" ;おかいあげ? buy?
+254D534: 4,"YES"  ;はい      yes
+254D538: 4,"NO"   ;いいえ     no
+
+;funpark V
+2553664: 12,"CAROUSEL" ;メリーゴーランド merry go round
+2553670:  8,"HAUNTED"  ;おばけやしき   haunted house
+2553678:  8,"TEACUP"   ;コーヒーカップ  coffee cup
+2553680:  8,"FERRIS"   ;かんらんしゃ   ferriswheel
+
+;.. go yes no option menu V
+25535DC: 4,"GO?" ;いく? go?
+
+;dream fountain V
+25536FC: 12,"THROW$10?" ;10$なげいれる? throw in $10?
+
+;built in games V
+253A234:  8,"CATCH"    ;あみだキャッチ Amida catch 
+253A23C: 12,"JUMPROPE" ;たまともなわとび tama tomo jumprope
+253A278: 8,"PLAY?"     ;あそぶ? play?
+
+;=======================================
+;heart icon
+;=======================================
+
+;V
+25393E8: 6,"ITEMS"  ;もちもの  inventory
+25393EE: 5,"SHOP"   ;おみせ   shop (note relocated -2)
+24ff646: R8=25393EE  ;relocated 25393f0
+
+;give/recieve/play V
+25393F3: 5,"GIVE"    ;あげる give (relocate -1)
+25393F8: 8,"RECIEVE" ;もらう  recieve
+;25393FC:            ;あそぶ play (use alternate copy at 25394CC+3)
+24FF6B2: R7=25393F3  ;relocated give 
+2539588: 025393F3    ;relocated give 
+2539408: 025394CF    ;use PLAY string at 25394CC+3
+2539518: 025394CF    ;use PLAY string at 25394CC+3
+
+;connectionplay games V
+2539420: 8,"HIDESEEK" ;かくれんぼ      hide and seek
+2539428: 8,"COOKING"  ;クッキング      cooking
+;2539430: 12,"CASTLE"  ;おしろのおたから treasure castle (probably not used)
+;253943C: 12,"SCHOOL"  ;たまスクでさがせ search at tama school (probably not used)
+
+;V
+2539478: 12,"COOKING" ;クッキングゲーム cooking game
+2539484:  8,"PLAY?"    ;あそぶ?     play?
+253948C:  8,"1FRIEND" ;ふたりであそぶ 2players
+2539494:  8,"2FRIENDS" ;3にんであそぶ 3players
+253949C:  8,"3FRIENDS" ;4にんであそぶ 4players
+
+;V
+25394CC: 8,"GO PLAY"  ;あそびにいく   goto play (note PLAY is also used as 25393FC replacement)
+25394D4: 8,"INVITE"   ;ともだちをよぶ  call a friend
+
+;P's submenu V
+;                      ;           play
+25394FC: 12,"EXCHANGE" ;アイテムこうかん item exchange
+;                      ;           propose
+2539508:  8,"VISIT"    ;ほーもん      visit
+2538304:  8,"PROPOSE"  ;プロポーズ	   propose
+
+;propose message 1 V
+25382CC: 8,"YET"      ;まだプロポーズ propose yet V
+25382D4: 8,"CAN NOT"  ;できないよ!  cannot V
+24fea1c: R6=25382D4   ;cannot  V
+24fea26: R7=2538304   ;propose V
+24fea2c: R8=25382CC   ;yet     V
+24fea36: 6C09         ;null string (ld.w %r9,0) V
+24fea22: 6C84         ;text y-offset = 8 (ld.w %r4,8)
+
+;propose message 2 V
+25382EC: 12,"FRIEND"    ;このともだちには   this friend
+25382F8: 12,"TO FRIEND" ;このともだちからは from this friend (once)
+;                       ;プロポーズ      propose (menu item too)
+;                       ;できないよ!     cannot
+24feaf4: R6=25382D4 ;cannot V
+24feaee: R7=2538304 ;propose V
+24feade: R8=25382EC ;friend V
+24feae8: R8=25382F8 ;to friend V
+
+;marry option menu V
+25382DC: 8,"MARRY?" ;けっこん marry
+25382E4: 4,"YES"    ;する   make
+25382E8: 4,"NO"     ;しない  not
+
+;marry option 2 V
+2552634: 8,"MARRY?" ;けっこん
+255263C: 4,"YES"    ;する
+2552640: 4,"NO"     ;しない
+
+;main comms menu V
+25395B8: 12,"TAMA iDL" ;たまごっちiDL
+25395C4:  8,"DOWNLOAD" ;ダウンロード
+25395CC:  8,"PIERCE"   ;たまデコピアス
+25395D4:  8,"SPECIAL"  ;スペツー
+25395DC: 12,"DEBUG"    ;╬デバックセット
+
+;comms-exchange-give-shop menus V
+253932C: 8,"LIVING"   ;リビング
+2539334: 8,"MINIGAME" ;ミニゲーム
+253933C: 8,"OUTING"   ;おでかけさき
+2539344: 6,"MEALS"    ;ごはん +2 chars
+253934A: 6,"SNACK"    ;おやつ (relocate+2)
+;253934C:             ;レシピ recipe (relocated to 25393A0)
+2539378: 253934A      ;relocated SNACK
+2539380: 25393A0      ;relocated RECIPE
+;relocated recipe text 
+25393A0: 8,"RECIPE"   ;れいぞうこ  fridge
+
+;comms-exchanges-give-items-menu V
+;25393A0: 8,"FRIDGE"   ;れいぞうこ  fridge (this space is used for recipe)
+25393A8: 8,"CLOTHES"  ;ようふく	    outfit
+25393B0: 8,"ACCESSO…" ;アクセサリー accessories
+25393B8: 8,"TOYS"     ;おどうぐ    toys
+25393C8: 2557A1C      ;use alternative for above FRIDGE 
+
+;=======================================
+;bag icon
+;=======================================
+
+;V
+254d4f8: 8,"CLOTHES"  ;ようふく    8,clothes
+254D500: 8,"ACCESSO…" ;アクセサリー  8,accessories
+
+;=======================================
+;treasure chest
+;=======================================
+
+;max 8 char strings V
+254AE54: 5,"MAIL"    ;てがみ     letter
+254AE59: 8,"SPECIAL" ;スペシャル   special (relocated)
+254AE61: 7,"STAMPS"  ;スタンプカード stamp card
+
+;relocations for above: V
+254ae6c: 0254ae59 ;moved special
+254ae70: 0254ae61 ;moved stamp card
+
+;V
+25597dc: 6,"READ?" ;よむ? read? (overwrites unused letter string)
+
+;=======================================
+;notebook
+;=======================================
+
+;V
+2559468: 12,"TAMATOMO" ;たまともてちょう  tamatomo
+2559474: 12,"PETS"     ;たまペットリスト  tama pet list
+2559480:  8,"FRIENDS"  ;ともだち    friends
+2559488:  8,"DIARY"    ;えにっき    picture diary
+
+;=======================================
+;ITEM related
+;=======================================
+
+;no room for transfer dialog (auto centered)  V
+241752a: 6C82          ;fix string length to 8 chars
+2557BDC:  8,"NO ROOM"  ;これいじょう       this transfere
+2557BE4: 12,"FOR ITEM" ;ほぞんできないよ! can not be saved!
+2557BF0:  8,"PICK ONE" ;どれをけすか     it dissapears or which one
+2557BF8:  8,"TO ERASE" ;えらんでね!     I choose!
+
+;undefined string V
+25576e8  8,"EEK!"  ;ぃイぃぃ there is no proper string to return. Wanted to use ☼BURP☼ 1st but decided to use EEK! instead :)
+
+;no space for transfer option menu V
+2557C00: 8,"ERASE?" ;どうする?  do what? (reused by 241aabe)
+2557C08: 4,"YES"    ;けす  erase
+2557C0C: 8,"NO"     ;けさない  do not erase
+
+;erase option menu V
+;25593D0: 4,"ERA?" ;けす?  erase? (relocated see below)
+25593D4: 4,"YES"  ;はい  yes
+25593D8: 4,"NO"   ;いいえ  no
+241AABE: R9=2557C00 ;change 25593D0 to 2557C00
+
+;erase option menu V
+2559410: 8,"ERASE?" ;どうする?
+2559418: 4,"YES"    ;けす
+255941C: 8,"NO"     ;けさない
+
+;take/sell option V
+25525BC: 8,"TAKE?" ;つれていく? take? (pet)
+25525C4: 8,"SELL?" ;これをうる? sell?
+25525CC: 4,"YES"   ;はい     yes
+25525D0: 4,"NO"    ;いいえ    no
+
+;erase confirmation option V
+2559388: 8,"SURE?" ;ほんとうに? are you sure?
+25578C8: 4,"YES"   ;はい yes
+25578cc: 4,"NO"    ;いいえ no
+
+;erase confirmation are you sure? V
+2558114: 8,"SURE?" ;ほんとうに?	are you sure?
+2558218: 4,"YES"   ;はい Yes
+255821c: 4,"NO"    ;いいえ No
+
+;date option V
+2552644: 8,"DATE?"  ;デートにいく?
+
+;---------------------------------------

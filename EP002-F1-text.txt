@@ -1,0 +1,468 @@
+﻿;Tamagotchi P's text patch script by Mr.Blinky May/June 2014
+;-------------------------------------------------------------------------------
+
+;script for patch: EP002-F1 (Firmware V1 / VER56 2012-11-03)
+
+;revision: 1
+
+;Script Info:
+;------------
+
+;script file format must be UTF-8 (when non ASCII characters are used)
+;Use ';' (semicolon) for remarks
+
+;syntax (without the semicolon):
+
+;02000000:   Set current rom address to 02000000 hexadecimal
+;8,"TEXT"    First zero out 8 bytes at current address and then write string at current address
+;00          write byte 00 at current address
+;0000        write (half)word at current address
+;00000000    write long (word) at current address
+;00 0000 00  write byte, (half)word, byte at current address
+;R7=02000000 store 6 byte instruction xld.w r7,02000000 (any register r0..r14 can be used)
+
+;Note: all numbers are hexadecimal except the length number of strings
+
+;Use any of the folowing characters in strings:
+; hiragana: あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやゆよらりるれろわをんぁぃぅぇぉっゃゅょがぎぐげござじずぜぞだぢづでどばびぶべぼぱぴぷぺぽ
+; katakana: アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲンァィゥェォッャュョガギグゲゴザジズゼゾダヂヅデドバビブベボパピプペポ
+; symbols:  ー～…､｡()｢｣.・!?&◯☓♥☼★@♪╬↑↓→←$
+; numbers:  0123456789
+; roman:    ABCDEFGHIJKLMNOPQRSTUVWXYZi_
+; special:  use 'ー' for hyphen
+;           use '<' for new line
+;           use '#' for end of text (normally not required as strings are zeroed out first)
+
+;NOTE: using any other character then those above will result in a 0 terminator being used.
+
+;-------------------------------------------------------------------------------
+
+;---------------------------------------
+;intro texts EP001 fixes
+;---------------------------------------
+
+;tama cook 2 line balloon text
+2536CCC: 16,"WELCOME♪"     ;いらっしゃいっちゅうか､ (EP001 change: Take a Seat, works
+2536CDC: 12,"TAKE A SEAT"  ;ちゅうもんはなにかな?  better with birthday event)
+
+;cafe mama 2 line text balloon
+2536CE8: 12,"OH♪WELCOME♪"  ;あら､いらっしゃい♪ (EP001 fix: unsupported , changed to ♪)
+
+;tamamori 2 line text balloon
+2536D6C: 12,"TAKE A LOOK♪" ;タリのものがあるわよ♪ (EP001 fix: line swap,this is line 2)
+2536D78: 12,"WELCOME★"     ;ようこそ★あなたにピッ (EP001 fix: line swap,this is line 1)
+
+;---------------------------------------
+;daycare texts + diary V
+;---------------------------------------
+
+;daycare intro 2 line text balloon
+2536EF0: 12,"HI EVERYONE!" ;よいこのみんな～
+2536EFC: 12,"HURRY INSIDE" ;こんにちはどら～☼
+
+;daycare staying
+2536F08: 10,"EVERYONE…"   ;よいこのみんな～きょうも (16-6 to save 2 bytes patch size)
+2536F18: 12,"LETS PLAY!"  ;げんきにあそぶどら～☼
+
+;daycare leaving
+2536F5C: 12,"SAY BYE BYE"  ;みんなさようなら～きを
+2536F68: 12,"TO EVERYONE♪" ;つけてかえってどら～♪
+
+;add entry to picture diary
+2559168: 8,"→DIARY…" ;えにっきちゅう
+
+;diary is full error message
+2559170:  8,"DIARY"        ;えにっきが (line 1)
+2559178:  8,"IS NOW"       ;いっぱいに (line 2)
+2559180:  8,"FULL"         ;なったよ!  line 3)
+
+;diary entry not added error message (line 1 reused)
+2559188: 10,"FULL.NOTE"    ;いっぱいで     (line 4)
+2559192: 10,"NOT ADDED"    ;かけなかったよ! (line 5)(relocated +2)
+241C58A: R9=2559192        ;relocate(+2)
+
+;---------------------------------------
+;school texts
+;---------------------------------------
+
+;school sports test (success?) text
+2536F24: 12,"YES!TRAINING" ;しゅうごー!おくれたら
+2536F30: 16,"COMPLETED!"   ;こうてい100しゅうだ!
+
+;leaving school text
+2536F40: 16,"STUDYING WAS" ;たのしくべんきょうできた
+2536F50: 12,"FUN TODAY!"   ;かい?またあした～!
+
+;school sports test (failed) text
+2536F74: 10,"I FAILED"     ;テストのじかんだああああ (16-6 length saves 2 bytes)
+2536F84: 16,"WAAAAAAH!!!!" ;ああああああああ!!!!
+
+;---------------------------------------
+;marry/dating texts
+;---------------------------------------
+
+;marry/dating text intro text
+2536E60: 12,"LETS BRING"   ;みんなオマチカネです!
+2536E6C: 12,"EVERYONE IN♥" ;しょうかいしますね♥
+
+;marry/dating make your choice 1/2 text (less hacking version)
+2536E78: 16,"DID YOU FIND" ;このみのタイプはいました
+;2536E88:  4,"♥?"           ;か? (don't change use 'LOVE?' below)
+248571a: R7=2536EA2         ;\
+24857aa: R7=2536EA2         ; | point to 'LOVE?' below
+2485832: R7=2536EA2         ; |
+24858c2: R7=2536EA2         ; |
+248594a: R7=2536EA2         ; |
+24859da: R7=2536EA2         ;/
+
+;marry/dating make your choice 1/2 text
+2536E8C: 16,"THE ONE YOU"  ;どのたまごっちにするか
+2536E9C: 12,"TRULY LOVE?"  ;きめてくださいね｡ (note 'LOVE?' used above too)
+
+;---------------------------------------
+
+;wear option menu
+2537F20: 8,"WEAR?"      ;みにつける? wear?
+2537F28: 8,"CLOTHES"    ;ようふく  clothes
+2537F30: 8,"ACCESSO…"   ;アクセサリー accessories
+
+;remove clothes/accesoires text (wont fit relocate)
+254ABB1: 7,"REMOVE"     ;はずす remove (relocated-3)
+24046AE: R9=254ABB1     ;relocated remove
+
+;change character options
+2552448: 12,"REVERT?"   ;へんしんかいじょ? (undo character change)
+2552454:  8,"CHANGE?"   ;へんしんする?   (character change)
+
+;unlocked a new icon design
+2536C80: 10,"CONGRATS!" ;あたらしい
+2536C8A: 8,"YOU GOT"    ;おせわマークの (relocate+2) (must be 7 chars,xpos can't be changed)
+2536C92: 10,"NEW ICON"  ;したのデザインを (relocate+2)
+2536C9C: 12,"DESIGNS!"  ;ゲットしました!
+24235AC: 6D09           ;xpos 16 center CONGRATS!
+24235B8: R7=2536C8A     ;relocate+2
+24235CA: R7=2536C92     ;relocate+2
+
+;hide seek game text
+2536D14: 12,"IM IT! HIDE!" ;おにになるね! I'm the demon!
+2536D20:  8,"ONE…"  ;いーち､  ONE,
+2536D28:  8,"TWO…"  ;にーい､  TWO,
+2536D30:  8,"THREE" ;さーん､  THREE
+2536D38:  8,"FOUR…" ;しーい､  FOUR,
+2536D40:  6,"FIVE…" ;ごー､   FIVE, (overwrite 2 chars of SIX)
+2536D46:  6,"SIX…"  ;ろーく､  SIX, (relocate+2)
+2536D4C:  8,"SEVEN" ;しーち､  SEVEN
+2536D54:  8,"EIGHT" ;はーち､  EIGHT
+2536D5C:  8,"NINE…" ;きゅー､  NINE,
+2536D64:  8,"TEN!"  ;じゅー!  TEN!
+2451c60: R7=2536D46 ;SIX relocate+2
+2451cb6: R7=2536D46 ;SIX relocate+2
+2451A88: 6d49       ;ld.w %r9,0x14  ;3 new x-pos
+2451ADA: 6d49       ;ld.w %r9,0x14  ;3 new x-pos
+2451B2A: 6d49       ;ld.w %r9,0x14  ;4 new x-pos
+2451B7C: 6d49       ;ld.w %r9,0x14  ;4 new x-pos
+2451BCA: 6d49       ;ld.w %r9,0x14  ;5 new x-pos
+2451C20: 6d49       ;ld.w %r9,0x14  ;5 new x-pos
+2451D12: 6d49       ;ld.w %r9,0x14  ;7 new x-pos
+2451D68: 6d49       ;ld.w %r9,0x14  ;7 new x-pos
+2451DB6: 6d49       ;ld.w %r9,0x14  ;8 new x-pos
+2451E0C: 6d49       ;ld.w %r9,0x14  ;8 new x-pos
+2451E5A: 6d49       ;ld.w %r9,0x14  ;9 new x-pos
+2451EB0: 6d49       ;ld.w %r9,0x14  ;9 new x-pos
+
+;connect play game. get item message
+2537004: 8,"YOU GOT" ;アイテム
+253700C: 8,"AN ITEM" ;ゲット!!
+24fa5e2: 6DC9        ;xld.w %r9,0x1C ;fixed x pos line 1
+24FA5F8: 6DC9        ;xld.w %r9,0x1C ;fixed x pos line 2
+
+;---------------------------------------
+;Dream beach game
+;---------------------------------------
+
+;dream beach game start text 2 line text balloon
+2536D84: 12,"GET THE FLAG"  ;たいけつするびー! (line2)
+2536D90: 12,"LETS PLAY"     ;ぼくとビーチフラッグ (line1)
+
+;dream beach game lost 2 line text balloon
+2536D9C: 12,"HAHA WELL"     ;ふっふっふ!それじゃ
+2536DA8: 12,"COME AGAIN!"   ;またしょうぶするびー!
+
+;beach destination win 2 line text balloon (old version)
+;2536C60: 16,"YOU ARE FAST" ;おまえなかなかやるびー!
+;2536C70: 16,"HAVE THIS!"   ; これをあげるびー!
+
+;beach destination win 2 line text balloon (new version)
+2536C60: 16,"YOU WON!HERE"  ;おまえなかなかやるびー!
+2536C70: 16,"HAVE THIS!"    ; これをあげるびー!
+
+;=======================================
+;deco pierce messages
+;=======================================
+
+;00,10: deco pierce not found message
+2557D74:  8,"PIERCE"     ;ピアスが  (also set by 11)
+2557D7C: 12,"NOT FOUND"  ;ささってないよ!
+
+;01: link yes/no? option
+2557D88: 8,"LINK?"       ;リンクする?
+
+;02: pierce is linked to someone else
+2557D90: 10,"PIERCE IS"  ;リンクすると +2
+2557D9A: 10,"LINKED TO"  ;のリンクがきえるよ!  -2
+2521b6c: R9=2557D9A      ;relocate +2
+2521b46: c001 6C87       ;xld.w     %r7,0x48 ;name y-pos -> 3rd line
+2521b68: c000 6F87       ;xld.w     %r7,0x38 ;linked to y-pos -> 2nd line
+
+;03: link for sure? (already patched in EP001)
+
+;04: Pierce is already linked
+2557DAC: 8,"PIERCE"      ;このピアスとの
+2557DB4: 8,"ALREADY"     ;リンクを
+2557DBC: 8,"LINKED!"     ;かくにんしたよ
+
+;05: can't make new link with current tamagotchi
+2557DC4: 12,"CANT LINK"  ;このたまごっちと
+2557DD0: 12,"CHANGE"     ;いっしょのあいだは
+2557DDC: 12,"YOUR TAMA"  ;あたらしくリンク
+2557DE8:  8,"GOTCHI!"    ;できないよ!
+
+;06-1: You can only link 1 pierce at a time
+2557DF0:  8,"YOU CAN"    ;1どにリンク
+2557DF8: 10,"LINK ONLY"  ;できるのは､ +2
+;2557E00:  8,"1 PIERCE"  ;1つのピアス (relocated to 2557E0E below)
+2557E04:  10,"AT A TIME" ;だけだよ! (relocated -4)
+2557E0E: 2,"1 "          ;combined with 2558180 -> '1 PIERCE'
+2521ED0: R9=2557E0E      ;relocated "1 PIERCE"
+2521ef4: R9=2557E04      ;relocated "AT A TIME"
+
+;06-2: <pierce title> Pierce Unlink?
+2557E10: 8,"PIERCE" ;ピアスとの (also used by 12)
+
+;07: unlink yes/no option
+2557E18: 8,"UNLINK?" ;リンクをきる?
+
+;08: no text
+
+;09: <pierce title> PIERCE
+25221ec: R9=2557E10 ;use alternative "PIERCE"
+
+;0A,0B: images
+
+;0C: unlink yes/no option
+2557E24: 12,"UNLINK?"   ;リンクかいじょ?
+
+;0D menu icon changed (moved to EP003 due to lack of space)
+
+;0E: change character? yes/no option
+2557E48: 8,"CHANGE?"    ;へんしんする?
+
+;0F: .. yes/no option
+2557E50: 8,"REVERT"     ;へんしん
+2557E58: 8,"CHANGE?"    ;かいじょする?
+
+;10 <pierce title> not found
+;use other occurrence of 'not found' so space can be used for 'will be'
+252258C: R9=2557D7C		;(use earlier 'NOT FOUND' instead of 2557E60)
+
+;11 pierce not found, pierce will be unlinked (checking link)
+2557D74:  8,"PIERCE"    ;ピアスが (also set by 00)
+2557E60: 12,"WILL BE"   ;みつからないよ! (was 'not found')
+2557E6C: 12,"UNLINKED!" ;リンクがきれたよ!
+
+;12 link with pierce broken
+2557E10:  8,"PIERCE"    ;ピアスとの (also used by 06)
+;2557E78: 12,"UNLINKED!" ;リンクがきれたよ! (not used to save space)
+25227a0:  R9=2557E6C     ;use duplicate instead
+
+;13: insert pierce again to keep link
+2557E84: 8,"INSERT"     ;ピアスをつけて put pierce
+2557E8C: 8,"PIERCE"     ;もういちど    once again
+2557E94: 8,"AGAIN!"     ;リンクしてね!  Link I was
+
+;14: write to pierce yes/no
+2557E9C: 12,"WRITE TO?" ;ピアスにかきこむ?
+
+;15: writing
+2557EB0: 8,"WRITING"    ;かきこみちゅう
+
+;16-19 already English
+
+;=======================================
+;tamagotchi names
+;=======================================
+
+;14 char support for internal tama names (F2 addresses):
+2406130: 5C14 ;ld.w    [%sp+0x1],%r4 ;set font to <> 0 for normal size
+2406132: 6CE4 ;ld.w    %r4,0xE       ;name width max 14 chars
+2406138: 6C77 ;ld.w    %r7,0x7       ;name x pos -1
+240613C: 6E58 ;ld.w    %r8,0x25      ;name y pos + 5
+
+;14 CHAR SUPPort deco pierce tama names (F2 addresses):
+24061C6: 5C14 ;ld.w    [%sp+0x1],%r4 ;set font to <> 0 for normal size
+24061C8: 6CE4 ;ld.w    %r4,0xE       ;name width max 14 chars
+24061CE: 6C77 ;ld.w    %r7,0x7       ;name x pos -1
+24061D2: 6E58 ;ld.w    %r8,0x25      ;name y pos + 5
+
+;append 'S ' to name for birthday text
+2410AE2: 6F24      ;ld.w    %r4,-0xE ;= F2 = 'S'
+2410AF4: 6015      ;add     %r5,0x1  ;make r5 point after 'S' char
+2410AF6: C001 6EC4 ;xld.w   %r4,0x6C ;space char to r4
+
+;TODO: (note birthday strings may not be over 9 chars because of longer tama names)
+;2555E2C:
+;TODO birthday address table
+;2555FEC:
+
+;fit most english tamagotchi names in original space: (0x150 bytes)
+25570D0: 11,"AOKUMOTCHI"
+25570DB: 11,"PINKBOTCHI"
+25570E6: 14,"MITSUMARUTCHI"
+25570F4: 11,"TATORUTCHI"
+25570FF: 11,"TERUPOTCHI"
+255710A: 14,"PUCHIHANATCHI"
+2557118: 11,"MAIMAITCHI"
+2557123: 10,"COSMOTCHI"
+255712D:  8,"NEOTCHI"
+2557135: 11,"NOKOBOTCHI"
+2557140:  9,"MAMETCHI"
+2557149: 10,"RIGHTTCHI"
+2557153: 11,"KNIGHTTCHI"
+255715E:  9,"TACTTCHI"
+2557167: 10,"NANDETCHI"
+2557171: 12,"KUCHIPATCHI"
+255717D:  9,"DOYATCHI"
+2557186: 13,"GOTCHIMOTCHI"
+2557193: 12,"SHIRIMOTCHI"
+255719F: 10,"CHARATCHI"
+25571A9: 11,"MONAKATCHI"
+25571B4: 13,"MOGUMOGUTCHI"
+25571C1: 10,"SPACYTCHI"
+25571CB: 11,"KARAKUTCHI"
+25571D6: 10,"ACCHITCHI"
+25571E0: 11,"YUMEMITCHI"
+25571EB: 11,"KIRARITCHI"
+25571F6: 12,"HIMESPETCHI"
+2557202: 10,"WALTZTCHI"
+255720C: 11,"AMIAMITCHI"
+2557217:  9,"MEMETCHI"
+
+;relocate remaining tamagotchi names to free space (0x7E bytes)
+255C980: 14,"CHOKOMAKATCHI"
+255C98E: 12,"YUKINKOTCHI"
+255C99A: 14,"HOSHIGIRLTCHI"
+255C9A8: 11,"CHOCHOTCHI"
+255C9B3:  9,"HARPTCHI"
+255C9BC:  9,"PATITCHI"
+255C9C5: 11,"KIRAMOTCHI"
+255C9D0: 13,"FURIFURITCHI"
+255C9DD: 10,"AMAKUTCHI"
+255C9E7: 10,"JULIETCHI"
+255C9F1: 13,"PEKOPEKOTCHI"
+
+;fix tama name pointers table at 2557590
+2557224: 025570D0
+255722C: 025570DB
+2557234: 025570E6
+255723C: 025570F4
+2557244: 025570FF
+255724C: 0255710A
+2557254: 02557118
+255725C: 02557123
+2557264: 0255712D
+255726C: 02557135
+2557274: 02557140
+255727C: 02557149
+2557284: 02557153
+255728C: 0255715E
+2557294: 02557167
+255729C: 02557171
+25572A4: 0255717D
+25572AC: 02557186
+25572B4: 02557193
+25572BC: 0255719F
+25572C4: 025571A9
+25572CC: 025571B4
+25572D4: 025571C1
+25572DC: 025571CB
+25572E4: 025571D6
+25572EC: 025571E0
+25572F4: 025571EB
+25572FC: 025571F6
+2557304: 02557202
+255730C: 0255720C
+2557314: 02557217
+;(relocated)
+255731C: 0255C980
+2557324: 0255C98E
+255732C: 0255C99A
+2557334: 0255C9A8
+255733C: 0255C9B3
+2557344: 0255C9BC
+255734C: 0255C9C5
+2557354: 0255C9D0
+255735C: 0255C9DD
+2557364: 0255C9E7
+255736C: 0255C9F1
+
+;=======================================
+;Pets names
+;=======================================
+
+;pet names original space
+25590B4: 13,"YUMEKYANTCHI" ;ゆめキャンっち
+25590C1: 10,"CHAPITCHI"    ;チャピっち
+25590CB: 13,"MONATOTOTCHI" ;もなトトっち
+
+;relocated remaining pet names in free space
+255C9FE: 10,"RINSUTCHI"    ;リンスっち
+255CA08: 13,"FURIRABUTCHI" ;ふりらぶっち
+
+;pet addr table
+25590DC: 025590B4
+25590E0: 025590C1
+25590E4: 025590CB
+25590E8: 0255C9FE
+25590EC: 0255CA08
+
+;support 12 char pet name display code
+241bb64: 6cC4 ;ld.w    %r4,0xC       ;12 char names
+241BB66: 5c04 ;ld.w    [%sp+0x0],%r4 ;<>0 normal
+
+;=======================================
+;Friends menu
+;=======================================
+
+;friends menu
+255903C:  8,"PROFILE" ;プロフィール
+2559044: 12,"OUTBOX"  ;メッセへんしゅう
+2559050:  8,"INBOX"   ;メッセりれき
+2559058:  8,"GOODBYE" ;おわかれ
+
+;message melody menu
+255808C: 8,"BIRTHDAY"  ;たんじょうび
+2558094: 8,"CLASSIC"   ;クラシック
+255809C: 8,"TWINKLE★" ;きらきらぼし (twinkle star)
+25580A4: 8,"XMAS"      ;クリスマス (christmas)
+25580AC: 8,"KKDREAM"   ;キラ2ドリーム (kira kira dream)
+25580B4: 8,"LETSPLAY"  ;またあそぼう let's play tamagotchi)
+
+;edit message option
+25582C4: 12,"EDIT?"   ;メッセへんしゅう? (edit message)
+25582D0:  4,"YES"     ;する
+25582D4:  4,"NO"      ;しない
+
+;cancel edit letter to friend
+25582D8: 12,"CANCEL?" ;へんしゅうやめる? CANCEL? (quit editing?)
+
+;add melody to message option
+25582E4: 12,"MELODY?" ;メロディつける? (add melody?)
+25582F0:  4,"YES"     ;はい
+25582F4:  4,"NO"      ;いいえ
+
+;confirm goodbye friend
+2559020: 8,"SURE?"    ;おわかれ? (are you sure)
+2557550: 4,"YES"      ;する
+2557554: 4,"NO"       ;しない
+
+;-------------------------------------------------------------------------------

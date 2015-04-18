@@ -1,0 +1,1244 @@
+﻿;Tamagotchi P's text patch script by Mr.Blinky Feb 2015
+;-------------------------------------------------------------------------------
+
+;script for patch: EP004-F2 (Firmware V2 / VER56 2013-01-06)
+
+;revision: 1
+
+;Script Info:
+;------------
+
+;script file format must be UTF-8 (when non ASCII characters are used)
+;Use ';' (semicolon) for remarks
+
+;syntax (without the semicolon):
+
+;02000000:   Set current rom address to 02000000 hexadecimal
+;8,"TEXT"    First zero out 8 bytes at current address and then write string at current address
+;00          write byte 00 at current address
+;0000        write (half)word at current address
+;00000000    write long (word) at current address
+;00 0000 00  write byte, (half)word, byte at current address
+;R7=02000000 store 6 byte instruction xld.w r7,02000000 (any register r0..r14 can be used)
+;> "ITEM"    Zero out 10 character item name, writes the string to current address and fixes the items checksum
+
+;Note: all numbers are hexadecimal except the length number of strings
+
+;Use any of the folowing characters in strings:
+; hiragana: あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやゆよらりるれろわをんぁぃぅぇぉっゃゅょがぎぐげござじずぜぞだぢづでどばびぶべぼぱぴぷぺぽ
+; katakana: アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲンァィゥェォッャュョガギグゲゴザジズゼゾダヂヅデドバビブベボパピプペポ
+; symbols:  ー～…､｡()｢｣.・!?&◯☓♥☼★@♪╬↑↓→←$
+; numbers:  0123456789
+; roman:    ABCDEFGHIJKLMNOPQRSTUVWXYZi_
+; special:  use 'ー' for hyphen
+;           use '<' for new line
+;           use '#' for end of text (normally not required as strings are zeroed out first)
+
+;NOTE: using any other character then those above will result in a 0 terminator being used.
+
+;=======================================
+; Friends input code TODO!
+;=======================================
+
+; ;remove message FROM/TO texts: (remarked 'cause no edit code yet)
+; 241a88c: 6c04      ;ld.w     %r4,0x1d ;へ TO
+; 241a928: 6c04      ;ld.w     %r4,0x1d ;へ TO
+; 241a8f8: c000 6c04 ;xld.w    %r4,0x26 ;'よ' of より FROM
+; 241a900: c000 6c04 ;xld.w    %r4,0x28 ;'り' of より FROM
+; 241a90c: c000 6c04 ;xld.w    %r4,0x26 ;'よ' of より FROM
+; 241a914: c000 6c04 ;xld.w    %r4,0x28 ;'り' of より FROM
+
+; TODO: add English character support (no display character support yet)
+; 2525f20: c003 6ba2 ;xcmp     %r2,0xfa ;'Z'+1
+
+;=======================================
+;Dream school texts
+;=======================================
+
+;14 +6
+
+254FEC8: 12,"HARD LESSONS"  ;きょうのレッスンはハード[LF]
+          7,"TODAY!<"       ;よ!がんばって～♪
+         11,"GOOD LUCK!"    ;
+
+;15 -7
+
+254FEE6: 12,"DANCE★CLASS<"  ;きょうはダンスレッスン★[LF]
+          7,"TODAY!<"       ;ついてこられないせいとは[LF]
+         11,"ONE♪…TWO♪…<"   ;おいていくわよ![LF]
+          7,"THREE♪<"       ;ワン・ツー・スリー♪[LF]
+         12,"COME TO THE<"  ;このままスタジオにいくわ[LF]
+          8,"STUDIO!"       ;よ～!
+
+;16 +2
+
+254FF1F: 12,"TODAYS VOCAL"  ;ボイストレーニング[LF]
+          7,"CLASS♪<"       ;のじかんよ～♪[LF]
+         12,"IDOL,ACTRESS"  ;かしゅ､じょゆう､[LF]
+         12,"ENTERTAINER…"  ;げいにん､せいゆう…[LF]
+         11,"ALL NEED A<"   ;すべてのキホンはしっかり[LF]
+         12,"GOOD VOICE!"   ;こえをだすことなのよ!
+
+;17 -5
+
+254FF61: 12,"POP QUIZ!ARE" ;いきなりだけどテストよ![LF]
+         11,"YOU READY?"   ;じゅんびはいいかしら?
+
+;18 -4
+
+254FF78: 12,"ITS COOKING<" ;アレ・キュイジーヌ!さあ[LF]
+         12,"CLASS TIME♪"  ;りょうりのじかんだよ～♪
+
+;19 -4
+
+254FF90: 12,"SLICE…CHOP…<" ;わぎり､こぐちぎり､[LF]
+          8,"SHREAD!<"     ;らんぎり､せんぎり…[LF]
+         11,"LETS STUDY<"  ;いろんなきりかたがあるけ[LF]
+         12,"WAYS TO CUT<" ;ど､きょうはみじんぎりを[LF]
+         11,"THINGS UP!<"  ;べんきょうしよう♪[LF]
+         10,"WAHAHAHA!"    ;ホアタタタタタタ!
+
+;1A +0
+
+254FFD0: 12,"COOKING ABC☼" ;りょうりの｢さしすせそ｣[LF]
+         12,"S…FOR SUGAR," ;さ…さとう､し…しお､[LF]
+         12,"SALT AND SOY" ;す…す､せ…しょうゆ､[LF]
+         12,"SAUCE.V…FOR<" ;では｢そ｣は?[LF]
+         12,"VINEGAR AND<" ;…ソース?…おしい![LF]
+         12,"M FOR MISO☼"  ;せいかいは｢みそ｣だよ☼
+
+;1B +0
+
+2550018: 12,"LETS MAKE IT"  ;いまからテストだよ![LF]
+         12,"TASTE GOOD!"   ;おいしくできるかな?
+
+;1C +3
+
+2550030: 10,"LETS MAKE<"
+         10,"BEAUTIFUL<"
+         11,"CREATIONS!"
+
+;1D -5
+
+255004F: 12,"LET FASHION<"  ;｢ファッション｣と[LF]
+         12,"AND PASSION<"  ;｢パッション｣はにてるよ[LF]
+         10,"SHINE!YOU<"    ;ね?つまり｢りゅうこう｣[LF]
+         10,"CANT HAVE<"    ;と｢じょうねつ｣は[LF]
+         12,"ONE WITHOUT<"  ;きってもきれないあいだが[LF]
+         11,"THE OTHER!"    ;らなんじゃないかな?
+
+;1E +1
+
+2550092: 12,"SCISSORS ARE"  ;びようしにとってハサミは[LF]
+         12,"BEAUTICIANS<"  ;パートナーだからね｡[LF]
+         12,"BEST TOOLS,<"  ;まいにちのおていれを[LF]
+         10,"TAKE GOOD<"    ;かかさずに､たいせつに[LF]
+          8,"CARE OF<"      ;してあげるんだよ★
+          7,"THEM!★"        ;
+
+;1F -1
+
+25500CF: 12,"POP QUIZ!★DO"  ;サプライズテスト★[LF
+         11,"YOUR BEST!"     ;みんながんばるんだよ!
+
+;20 +4
+
+25500E6: 12,"HI EVERYONE!"  ;はいよろしく!じゅぎょう[LF]
+         12,"LETS BEGIN!"   ;をはじめるよ
+
+;21 -4 science text 1
+
+25500FE:  8,"SAFETY,<"      ;ロボットをつくるときは[LF]
+         12,"CONVENIENCE&"  ;｢あんぜん・べんり・[LF]
+         11,"DURABILITY<"   ;じょうぶ｣の3つを[LF]
+         11,"ARE NEEDED<"   ;をこころがけるようにねぇ[LF]
+         11,"TO BUILD A<"   ;ばくはつするロボット[LF]
+         11,"GOOD ROBOT"    ;なんてダメだからねぇ
+
+;22 +1 science text 2
+
+255013E: 12,"ROBOTS MAKE<"  ;ロボットはたまごっちの[LF]
+         11,"TAMAGOTCHI<"   ;せいかつをべんりに[LF]
+         11,"LIVES EASY<"   ;してくれるけど､[LF]
+         12,"BUT RELYING<"  ;それにたよりきりで[LF]
+         11,"ON THEM IS<"   ;じぶんでなにもしないのは[LF]
+          8,"NO GOOD"       ;ダメだからねぇ
+
+;23 +12 science intro
+
+255017F: 12,"CLOSE THOSE<" ;きょうかしょしまって![LF]
+          7,"BOOKS!<"      ;テストはじめるよ～
+          9,"TIME FOR<"
+          8,"A TEST!"
+
+;24 -3 sports text 1
+
+25501A3: 12,"JUST FOLLOW-"  ;スポーツでは､かんとくの[LF]
+         10,"ING RULES<"    ;しじでかてることは[LF]
+         10,"WONT MAKE<"    ;すくない!せんしゅの[LF]
+         12,"YOU A WINNER"  ;のうりょくがしあいの[LF]
+          9,"IT TAKES<"     ;けっかにちょくせつ[LF]
+         12,"TALENT TOO!"   ;つながるのだーっ!
+
+;25 +3 sports text 2
+
+25501E4:   11,"WITH EQUAL<"     ;スポーツでは､[LF]
+            8,"SKILLS…<"        ;ぎじゅつやたいりょくが[LF]
+           12,"THE ONE WHO<"    ;おなじくらいのとき､[LF]
+           12,"TRAINS MOST…"    ;しょうぶをきめるのは[LF]
+            8,"WILL BE<"        ;つよいせいしんりょく[LF]
+           12,"THE WINNER!"     ;なんだぞっ!
+
+2550223:                        ;1 spare byte
+
+25520b4: 0254fec8 ;14 dream school
+25520b8: 0254fee6 ;15 dream school
+25520bc: 0254FF1F ;16 dream school
+25520c0: 0254FF61 ;17 dream school
+25520c4: 0254FF78 ;18 dream school
+25520c8: 0254FF90 ;19 dream school
+25520cc: 0254FFD0 ;1A dream school
+25520d0: 02550018 ;1B dream school
+25520d4: 02550030 ;1C dream school
+25520d8: 0255004F ;1D dream school
+25520dc: 02550092 ;1E dream school
+25520e0: 025500CF ;1F dream school
+25520e4: 025500E6 ;20 dream school
+25520e8: 025500FE ;21 dream school
+25520ec: 0255013E ;22 dream school
+25520f0: 0255017F ;23 dream school
+25520f4: 025501A3 ;24 dream school
+25520f8: 025501E4 ;25 dream school
+
+;school sports testing time text (translated in EP002 with wrong context)
+25372E4: 12,"SPORTS TEST!" ;テストのじかんだああああ (16-6 length saves 2 bytes)
+
+;=======================================
+; Job texts
+;=======================================
+
+;00 tama departure message (note duplicate version is not used) -8
+
+254DACC:  7,"I WISH<"       ;もっといっしょにい[LF]
+          9,"YOU WERE<"     ;てくれたら､こんな[LF]
+         13,"AROUND MORE…<" ;けつだんをせずにすんだかも[LF]
+         13,"NEXT TIME WE<" ;…こんどあえたらそのときは[LF]
+         14,"PLAY MORE OK?" ;もっともっとあそぼうね……
+
+;01 We’re looking for part time workers! You in? -3
+
+254DB04: 12,"NOW HIRING!<" ;アルバイトのぼしゅうがあ[LF]
+         13,"PLEASE APPLY" ;るよ!キミもやっちゃう?
+
+241319C: R4=0254DB04 ;Text 01 additional pointer
+
+;02 Sorry, we don’t need any part time workers now. +1
+
+254DB1D: 12,"SORRY THERE<" ;いまはアルバイトの[LF]
+         13,"ARE NO JOBS!" ;ぼしゅうがないっスよ↓
+
+;03 I don’t think you’re ready for this job yet. +1
+
+254DB36: 12,"YOU CANT DO<" ;キミにはアルバイトは[LF]
+         13,"THIS JOB YET" ;まだはやいみたいっスね↓
+
+;-- 04 park intro job text --------------------------
+
+;04. If there’s a tamagotchi in trouble, help him! -3
+
+254DB4F: 12,"GO SERVE AND" ;こまってるたまごっちがい[LF]
+         13,"PROTECT!PATO" ;たらたすけてあげてぱと!
+
+24131f8: R4=254DB4F
+
+;05. Good work on your patrol. See you again! +1
+
+254DB68: 12,"NICE PATROL!" ;パトロールおつかれぱと![LF]
+         13,"SEE YOU☼PATO" ;またよろしくぱと☼
+
+;06. Good work on your patrol. Here, take this! -1
+
+254DB81: 12,"NICE PATROL!" ;パトロールおつかれぱと![LF]
+         11,"TAKE THIS☼"   ;これをどうぞぱと☼
+
+;07. Take this for a job well done! -7
+
+254DB98: 12,"PATOS REWARD" ;がんばってくれたごほうび[LF]
+          9,"FOR YOU♪"     ;に､これもあげるぱと♪
+
+;-- 08 tama depa job intro ------------------- -1
+
+254DBAD: 12,"PLEASE SELL<" ;うってうってうりまくって[LF]
+         11,"MANY TOYS♪"   ;くださいませ～♪
+
+2413214: R4=254DBAD
+
+;09. Thanks for watching the shop! I’ll be counting on you again! +1
+
+254DBC4: 12,"NICE SALES～<" ;みせばんおつかれさま～[LF] +0
+         13,"KEEP IT U～P♥" ;またおねがいしま～す♥         +1 > +1
+
+;0A. Thanks for watching the shop! Here, have this! +0
+
+254DBDD: 12,"GREAT SALES～" ;みせばんおつかれさま～[LF]
+         12,"HAVE THI～S♥"  ;これをさしあげま～す♥
+
+;0B. I’m giving you this as well for a job well done! +1
+
+254DBF5: 12,"THIS IS FOR<" ;がんばったごほうびに[LF]
+         13,"YOUR EFFORT♥" ;こちらもさしあげま～す☼
+
+;-- 0C tamamori job intro text ------------- +3
+
+254DC0E: 12,"LETS PRETTY<" ;ステキにコーディネート[LF]
+         11,"THINGS UP★"   ;してあげてね★
+
+2413230: R4=254DC0E
+
+;0D Thanks for watching the shop! I’ll be counting on you again! +1
+
+254DC25: 12,"NICE SALES★<" ;みせばんおつかれさま★[LF]
+         13,"KEEP IT UP～♪" ;またおねがいね♪
+
+;0E Thanks for watching the shop! It’s not much, but here you go. -1
+
+254DC3E: 12,"NICE SALES★<" ;みせばんおつかれさま★[LF]
+         11,"TAKE THIS♪"   ;よかったらこれどうぞ♪
+
+;0F. I’m giving you this as well for a job well done! +5
+
+254DC55: 12,"A REWARD FOR" ;がんばったごほうびに[LF]
+         13,"YOUR LABORS★" ;これもあげるわ★
+
+;-- 10 cafe job intro text -------------------- +5
+
+254DC6E: 12,"SERVE WITH A" ;えがおでせっきゃく[LF]
+         13,"SMILE PLEASE" ;おねがいね♪
+
+241324c: R4=254DC6E
+
+;11 Good work! I’ll be counting on your again! +3
+
+254DC87: 11,"GOOD WORK♥<" ;おつかれさま♥[LF]
+         12,"KEEP IT UP!" ;またおねがいね!
+
+;12 Good work! Here, have this. +6
+
+254DC9E: 11,"GOOD WORK♥<" ;おつかれさま♥[LF]
+         11,"TAKE THIS♪"  ;これどうぞ♪
+
+;13 Take this as a reward for working so hard♪ Keep it up! -5
+
+254DCB4: 12,"A REWARD♪FOR" ;がんばったごほうびにこれ[LF]
+         11,"HARD WORK!"   ;どうぞ♪またおねがいね!
+
+254DCCB:                    ;1 spare byte
+
+254dd08: 0254dacc ;00 ;game over message (unused)
+
+254dd0c: 0254DB04 ;01
+254dd10: 0254DB1D ;02
+254dd14: 0254DB36 ;03
+
+254dd18: 0254DB4F ;04
+254dd1c: 0254DB68 ;05
+254dd20: 0254DB81 ;06
+254dd24: 0254DB98 ;07
+
+254dd28: 0254DBAD ;08
+254dd2c: 0254DBC4 ;09
+254dd30: 0254DBDD ;0A
+254dd34: 0254DBF5 ;0B
+
+254dd38: 0254DC0E ;0C
+254dd3c: 0254DC25 ;0D
+254dd40: 0254DC3E ;0E
+254dd44: 0254DC55 ;0F
+
+254dd48: 0254DC6E ;10
+254dd4c: 0254DC87 ;11
+254dd50: 0254DC9E ;12
+254dd54: 0254DCB4 ;13
+
+;todo: test job code
+
+;=======================================
+;
+;=======================================
+
+;=======================================
+;Park texts
+;=======================================
+
+;=======================================
+;Dream fountain texts
+;=======================================
+
+;=======================================
+;Dai outlook texts TODO!
+;=======================================
+
+;26. if you look into the binoculars, you can see your future self! +11
+;the only person who can change your future self is you, right now!
+
+2550224: 12,"YOU CAN SEE<" ;そうがんきょうをのぞけば[LF]
+         12,"YOUR FUTURE<" ;みらいのきみがみえるよ![LF]
+         12,"THROUGH THE<" ;みらいのきみを[LF]
+         12,"BINOCULARS.<" ;かえることができるのは[LF]
+         12,"ONLY YOU CAN" ;いまのきみだけなんだ!
+         11,"CHANGE IT!"
+
+;27. there is no returning from the road that you’ve walked to get here, but you can decide the road that you take from this point forward! a road to a fantastic future will open! -5
+
+2550260: 12,"THERE IS NO<"	;きみがあゆんできたみちは[LF]
+         11,"ROAD GOING<"   ;あともどりできないが､[LF]
+         12,"BACK.CHOOSE<"  ;これからあゆむみちは[LF]
+         12,"THE ROAD TO<"  ;きめることができる![LF]
+         12,"A FANTASTIC<"  ;すばらしいみらいへのみち[LF]
+         12,"FUTURE NOW!"   ;をきりひらいてゆくんだ!
+
+;28. i only believe what i’ve seen with my own eyes. but i’ll believer anything I see with them, even the most ridiculous things! Why don’t you take a look through the binoculars?
+
+;I BELIEVE
+;WHAT I SEE
+;WITH MY EYES
+;
+;EVEN THE 
+;RIDICULOUS
+;
+;I BELIEVE 
+;ANYTHING I
+;SEE WITH MY
+;EYES
+
+
+;25502AC: 4B 08 1A 3E 49 2E 19 22 45 20 10 FF               ;ぼくはじぶんのめでみた[LF]
+;25502B8: 23 19 0C 06 0C 2E 3E 15 02 53 09 46 FF            ;ものしかしんじない…けど[LF]
+;25502C5: 0A 19 22 45 20 10 23 19 1A 46 2E 15 FF            ;このめでみたものはどんな[LF]
+;25502D2: 16 BD 7C 3B 10 23 19 45 23 0C 2E 3E FF            ;にバカげたものでもしんじ[LF]
+;25502DF: 29 26 5C 53 07 20 23 0F 03 38 2E FF               ;るよ!…きみもそうがん[LF]
+;25502EB: 07 37 03 2D 19 41 02 13 20 10 27 5D 00            ;きょうをのぞいてみたら?
+
+;29. when you look at beautiful scenery, it’s tempting to take a photo. but i choose to only look. that way, it will remain in my heart forever and in a way that i’ll never forget!
+
+;25502F8: 0D 13 07 15 09 0C 07 2D 20 10 27 FF               ;すてきなけしきをみたら[LF]
+;2550304: 0C 35 0C 2E 2D 14 28 10 08 15 29 23 FF            ;しゃしんをとりたくなるも[LF]
+;2550311: 19 42 26 18 53 45 23 54 4B 08 1A 20 FF            ;のだよね…でも､ぼくはみ[LF]
+;255031E: 29 42 09 16 0C 13 29 2E 42 55 0F 19 FF            ;るだけにしてるんだ｡その[LF]
+;255032B: 1E 03 38 0A 0A 2B 16 19 0A 34 13 FF               ;ほうがこころにのこって[LF]
+;2550337: 3F 34 14 2C 0D 2A 15 02 06 27 18 5C 00            ;ずっとわすれないからね!
+
+;2A. you’re free to choose whether or not to care about what you’ve seen, or disregard it.
+
+;2550344: 20 04 10 23 19 2D 07 16 0D 29 19 23 FF            ;みえたものをきにするのも[LF]
+;2550351: 07 16 0C 15 02 19 23 3E 25 03 42 26 00 00 00      ;きにしないのもじゆうだよ
+
+;——————————
+
+;2B. for us, ever since we were little, “one step” is like taking a journey through a big city! looking at the scenery from here, our dream of a world trip expands.
+
+;2550360: 4B 08 27 19 58 02 34 50 59 1A 11 02 FF            ;ぼくらの｢いっぽ｣はちい[LF]
+;255036D: 0B 02 06 27 53 1F 11 2D 01 29 08 19 FF            ;さいから…まちをあるくの[LF]
+;255037A: 23 58 10 48 59 0C 13 29 26 03 15 23 FF            ;も｢たび｣してるようなも[LF]
+;2550387: 19 5C 0A 0A 06 27 09 0C 07 2D 15 38 FF            ;の!ここからけしきをなが[LF]
+;2550394: 22 29 14 58 0E 06 02 28 37 0A 03 59 FF            ;めると｢せかいりょこう｣[LF]
+;25503A1: 19 25 22 38 1B 2B 38 29 2E 42 63 00 00 00 00      ;のゆめがひろがるんだ★
+
+;2C. If you feel the rhythm and speak with it, singing becomes fun. it’s a viewing platform to watch your dreams. bright future. a sparkling future. what can you see?
+
+;25503B0: 01 29 08 9E B5 97 16 19 34 13 05 FF               ;あるくリズムにのってお[LF]
+;25503BC: 0C 35 4A 28 0C 13 10 27 54 03 10 03 FF            ;しゃべりしてたら､うたう[LF]
+;25503C9: 0A 14 38 10 19 0C 08 15 34 13 53 65 FF            ;ことがたのしくなって…♪[LF]
+;25503D6: 25 22 20 29 13 2E 4B 03 42 02 65 01 FF            ;ゆめみるてんぼうだい♪あ[LF]
+;25503E3: 06 29 02 0C 37 51 27 02 65 06 38 24 FF            ;かるいしょーらい♪かがや[LF]
+;25503F0: 08 20 27 02 65 15 16 38 20 04 29 5D 00 00 00 00   ;くみらい♪なにがみえる?
+
+;2D. The dream viewing platform. It can see the future! Professor… beautician… pop star… chef… famous athlete…. what can you see?
+
+;2550400: 25 22 20 29 13 2E 4B 03 42 02 65 FF               ;ゆめみるてんぼうだい♪[LF]
+;255040C: 20 04 29 6C 0C 37 51 27 02 5D FF                  ;みえる しょーらい?[LF]
+;2550417: 1A 06 0E 63 6C 48 26 03 0C 64 FF                  ;はかせ★ びようし@[LF]
+;2550422: 77 78 BC 9F 65 6C 80 AA 7E 61 FF                  ;アイドル♪ コック♥[LF]
+;255042D: 83 C6 51 88 0E 2E 0C 36 62 FF                         ;スポーツせんしゅ☼[LF]
+;2550437: 07 20 16 1A 6C 15 16 38 20 04 29 5D 00            ;きみには なにがみえる?
+
+;2E. The dream viewing platform. It can see the future! Robot… beauty salon… stage… restaurant… what can you see?
+
+;2550444: 25 22 20 29 13 2E 4B 03 42 02 65 FF               ;ゆめみるてんぼうだい♪[LF]
+;2550450: 20 04 29 6C 20 27 02 63 FF                        ;みえる みらい★[LF]
+;2550459: A1 C1 AA 8A 5D 6C 48 26 03 02 2E 5D FF            ;ロボット? びよういん?[LF]
+;2550466: 83 89 51 B4 5D 6C A0 83 8A 9D A4 5D FF            ;ステージ? レストラン?[LF]
+;2550473: 07 20 16 1A 6C 15 16 38 20 04 29 5D FF            ;きみには なにがみえる?[LF]
+;2550480: 78 7A 51 78 65 00 00 00   ;イエーイ♪
+
+;2F. I hope we can meet here again. Until then, bye bye bye!
+
+;2550488: 1F 10 0A 0A 45 01 04 10 27 02 02 18 FF            ;またここであえたらいいね[LF]
+;2550495: 0F 2A 1F 45 BD 78 BD 78 BD 78 65 00 00 00 00      ;それまでバイバイバイ♪
+
+;——————————
+
+;30. It’s said that those binoculars magically transmit what you see to your heart. I’m sure you will see a scenery that suits you well too.
+
+;25504A4: 0A 19 0F 03 38 2E 07 37 03 1A 18 54 FF            ;このそうがんきょうはね､[LF]
+;25504B1: 19 41 02 10 23 19 19 0A 0A 2B 2D FF               ;のぞいたもののこころを[LF]
+;25504BD: 03 12 0D 1F 1E 03 19 0F 03 38 2E FF               ;うつすまほうのそうがん[LF]
+;25504C9: 07 37 03 15 2E 45 0D 34 13 65 FF                  ;きょうなんですって♪[LF]
+;25504D4: 01 15 10 16 23 C3 AA 86 9E 19 FF                  ;あなたにもピッタリの[LF]
+;25504DF: 09 0C 07 38 20 04 29 1A 3F 26 61 00 00            ;けしきがみえるはずよ♥
+
+;31. Please take a look in the binoculars. The beautiful scenery will put you to ease.
+
+;25504EC: 0F 03 38 2E 07 37 03 2D FF                        ;そうがんきょうを[LF]
+;25504F5: 19 41 02 13 3C 27 2E 15 0B 02 65 FF               ;のぞいてごらんなさい♪[LF]
+;2550501: 07 2A 02 15 09 0C 07 1A FF                        ;きれいなけしきは[LF]
+;255050A: 01 15 10 19 0A 0A 2B 2D FF                        ;あなたのこころを[LF]
+;2550513: 02 24 0C 13 08 2A 29 2C 61 00 00 00 00            ;いやしてくれるわ♥
+
+;32. Children cannot see through those binoculars. But there are also things that only kids can see. That’s a special thing, you know. hehe
+
+;2550520: 0A 19 0F 03 38 2E 07 37 03 1A FF                  ;このそうがんきょうは[LF]
+;255052B: 11 02 0B 15 0A 16 1A 20 27 2A 15 02 FF            ;ちいさなこにはみられない[LF]
+;2550538: 19 53 45 23 11 02 0B 15 0A 16 0C 06 FF            ;の…でもちいさなこにしか[LF]
+;2550545: 20 04 15 02 23 19 42 34 13 01 29 19 FF            ;みえないものだってあるの[LF]
+;2550552: 26 61 0F 2A 2D 10 02 0E 12 16 0C 13 FF            ;よ♥それをたいせつにして[LF]
+;255055F: 18 63 1C 1C 1C 00 00 00 00                        ;ね★ふふふ
+
+;33. The same scenery can be at times either fun, sad, or it can bring back old memories. Isn’t it strange? But that’s why I come here so often!
+
+;2550568: 20 04 29 09 0C 07 1A 05 15 3E 45 23 FF            ;みえるけしきはおなじでも[LF]
+;2550575: 10 19 0C 06 34 10 28 54 06 15 0C 06 FF            ;たのしかったり､かなしか[LF]
+;2550582: 34 10 28 54 15 12 06 0C 06 34 10 28 FF            ;ったり､なつかしかったり[LF]
+;255058F: 53 06 2E 3E 06 10 38 11 38 03 19 61 FF            ;…かんじかたがちがうの♥[LF]
+;255059C: 1C 0C 39 26 18 5D 42 06 27 2C 10 0C FF            ;ふしぎよね?だからわたし[LF]
+;25505A9: 0A 0A 16 26 08 07 11 35 03 19 26 65 00 00 00      ;ここによくきちゃうのよ♪
+
+;34. I look forward to meeting you here again!
+
+;25505B8: 1F 10 0A 0A 45 01 15 10 14 01 04 29 FF            ;またここであなたとあえる[LF]
+;25505C5: 19 2D 10 19 0C 20 16 0C 13 29 2C 65 00 00 00      ;のをたのしみにしてるわ♪
+
+25520fc: 02550224 ;26-A dai outlook \
+2552100: 02550260 ;27-B dai outlook
+2552104: 025502ac ;28-C dai outlook
+2552108: 025502f8 ;29-D dai outlook
+255210c: 02550344 ;2A   dai outlook /
+2552110: 02550360 ;2B-A dai outlook \
+2552114: 025503b0 ;2C-B dai outlook
+2552118: 02550400 ;2D-C dai outlook
+255211c: 02550444 ;2E-D dai outlook
+2552120: 02550488 ;2F   dai outlook /
+2552124: 025504a4 ;30-A dai outlook \
+2552128: 025504ec ;31-B dai outlook
+255212c: 02550520 ;32-C dai outlook
+2552130: 02550568 ;33-D dai outlook
+2552134: 025505b8 ;34   dai outlook /
+
+;=======================================
+;Secret base TODO!
+;=======================================
+
+;35. Let’s make a rocket with all our dreams! If we put our power together, we can make a great one! (non random)
+
+;25505D4: 20 2E 15 19 25 22 38 10 08 0B 2E FF               ;みんなのゆめがたくさん[LF]
+;25505E0: 12 1F 34 10 A1 7F AA 8A 2D 02 34 FF               ;つまったロケットをいっ[LF]
+;25505EC: 0C 37 16 12 08 27 15 02 06 52 02 5D FF            ;しょにつくらないか～い?[LF]
+;25505F9: 20 2E 15 45 11 06 27 2D 01 2C 0E 2A FF            ;みんなでちからをあわせれ[LF]
+;2550606: 47 54 07 34 14 83 89 7D 15 A1 7F AA FF            ;ば､きっとステキなロケッ[LF]
+;2550613: 8A 38 06 2E 0E 02 0D 29 90 B5 0B 63 00            ;トがかんせいするハズさ★
+
+;36-A. To make the rocket fly properly, I’m making a gyrosensor. I can’t wait for the day that it launches.
+
+;2550620: A1 7F AA 8A 38 0E 02 06 08 16 FF                  ;ロケットがせいかくに[LF]
+;255062B: 14 49 10 22 16 FF                                     ;とぶために[LF]
+;2550631: B4 AB 78 A1 84 A4 81 51 FF                        ;ジャイロセンサー[LF]
+;255063A: 2D 12 08 34 13 02 1F 0D 5C FF                         ;をつくっています![LF]
+;2550644: 1A 34 0C 35 0B 0E 29 1B 38 FF                         ;はっしゃさせるひが[LF]
+;255064E: 10 19 0C 20 45 0D 18 62 00 00                         ;たのしみですね☼
+
+;37-B. The engine exploded again. But I’m not giving up! Lesson is learned, and I’m starting over!
+
+;2550658: 1F 10 7A A4 B4 A4 38 47 08 1A 12 FF               ;またエンジンがばくはつ[LF]
+;2550664: 0C 13 0C 1F 02 1F 0C 10 53 68 FF                  ;してしまいました…↓[LF]
+;255066F: 45 23 54 01 07 27 22 1F 0E 2E 5C FF               ;でも､あきらめません![LF]
+;255067B: 0A 19 0C 34 4C 02 2D BD 8E 16 0C 13 FF            ;このしっぱいをバネにして[LF]
+;2550688: 1F 10 0B 02 0C 37 06 27 FF                        ;またさいしょから[LF]
+;2550691: AE A4 BD 28 1F 0D 5C 5C 00 00 00                  ;ガンバります!!
+
+;38-C. To explore other stars, I thought I’d bring my inventions along. But it seems they may not fit in the rocket.
+
+;255069C: 1E 06 19 1E 0C 2D 10 2E 09 2E 0D 29 FF            ;ほかのほしをたんけんする[LF]
+;25506A9: 10 22 16 54 4B 08 19 12 08 34 10 FF               ;ために､ぼくのつくった[LF]
+;25506B5: 1A 12 22 02 1B 2E 2D 23 34 13 FF                  ;はつめいひんをもって[LF]
+;25506C0: 02 0A 03 14 05 23 34 10 19 45 0D 38 FF            ;いこうとおもったのですが[LF]
+;25506CD: 05 05 07 0D 39 13 A1 7F AA 8A 16 FF               ;おおきすぎてロケットに[LF]
+;25506D9: 19 28 0F 03 16 01 28 1F 0E 2E 53 68 00 00 00      ;のりそうにありません…↓
+;
+; 39+ !!! TODO
+;
+; 2552138: 025505d4 ;35 -  (fixed text)
+; 255213c: 02550620 ;36 \A
+; 2552140: 02550658 ;37 |B (random 1 out of 3 texts)
+; 2552144: 0255069c ;38 /C
+; 2552148: 025506e8 ;39 \A
+; 255214c: 02550730 ;3A |B
+; 2552150: 02550774 ;3B /C
+; 2552154: 025507b0 ;3C \A
+; 2552158: 025507e8 ;3D |B
+; 255215c: 02550830 ;3E /C
+; 2552160: 02550878 ;3F \A
+; 2552164: 025508c0 ;40 |B
+; 2552168: 02550910 ;41 /C
+; 255216c: 02550950 ;42 \A
+; 2552170: 02550998 ;43 |B
+; 2552174: 025509dc ;44 /C
+; 2552178: 02550a28 ;45 \A
+; 255217c: 02550a6c ;46 |B
+; 2552180: 02550ab8 ;47 /C
+; 2552184: 02550b04 ;48 \A
+; 2552188: 02550b58 ;49 |B
+; 255218c: 02550ba0 ;4A /C
+; 2552190: 02550be8 ;4B \A
+; 2552194: 02550c28 ;4C |B
+; 2552198: 02550c70 ;4D /C
+; 255219c: 02550cb0 ;4E \A
+; 25521a0: 02550d00 ;4F |B
+; 25521a4: 02550d3c ;50 /C
+; 25521a8: 02550d8c ;51 \A
+; 25521ac: 02550dc8 ;52 |B
+; 25521b0: 02550e10 ;53 /C
+; 25521b4: 02550e5c ;54 \A
+; 25521b8: 02550ea0 ;55 |B
+; 25521bc: 02550ee8 ;56 /C
+; 25521c0: 02550f30 ;57 \A
+; 25521c4: 02550f70 ;58 |B
+; 25521c8: 02550fb4 ;59 /C
+; 25521cc: 02550ff4 ;5A \A
+; 25521d0: 02551034 ;5B |B
+; 25521d4: 02551074 ;5C /C
+; 25521d8: 025510b8 ;5D \A
+; 25521dc: 025510f8 ;5E |B
+; 25521e0: 0255113c ;5F /C
+; 25521e4: 0255117c ;60 \A
+; 25521e8: 025511bc ;61 |B
+; 25521ec: 025511f4 ;62 /C
+; 25521f0: 02551240 ;63 \A
+; 25521f4: 02551280 ;64 |B
+; 25521f8: 025512c0 ;65 /C
+; 25521fc: 02551300 ;66 \A
+; 2552200: 02551338 ;67 |B
+; 2552204: 02551378 ;68 /C
+; 2552208: 025513a8 ;69 \A
+; 255220c: 025513f0 ;6A |B
+; 2552210: 0255143c ;6B /C
+; 2552214: 02551474 ;6C \A
+; 2552218: 025514b8 ;6D |B
+; 255221c: 025514f4 ;6E /C
+; 2552220: 02551538 ;6F \A
+; 2552224: 02551578 ;70 |B
+; 2552228: 025515b4 ;71 /C
+; 255222c: 025515ec ;72 \A
+; 2552230: 02551634 ;73 |B
+; 2552234: 02551674 ;74 /C
+; 2552238: 025516b8 ;75 \A
+; 255223c: 025516f4 ;76 |B
+; 2552240: 02551738 ;77 /C
+; 2552244: 02551774 ;78 \A
+; 2552248: 025517ac ;79 |B
+; 255224c: 025517f4 ;7A /C
+; 2552250: 02551830 ;7B \A
+; 2552254: 02551870 ;7C |B
+; 2552258: 025518ac ;7D /C
+; 255225c: 025518f4 ;7E \A
+; 2552260: 02551930 ;7F |B
+; 2552264: 02551970 ;80 /C
+; 2552268: 025519a8 ;81 \A
+; 255226c: 025519e8 ;82 |B
+; 2552270: 02551a28 ;83 /C
+; 2552274: 02551a6c ;84 \A
+; 2552278: 02551aac ;85 |B
+; 255227c: 02551aec ;86 /C
+; 2552280: 02551b30 ;87 \A
+; 2552284: 02551b70 ;88 |B
+; 2552288: 02551bb8 ;89 /C
+; 255228c: 02551bfc ;8A \A
+; 2552290: 02551c3c ;8B |B
+; 2552294: 02551c88 ;8C /C
+; 2552298: 02551cd4 ;8D \A
+; 255229c: 02551d18 ;8E |B
+; 25522a0: 02551d54 ;8F /C
+; 25522a4: 02551d98 ;90 \A
+; 25522a8: 02551de0 ;91 |B
+; 25522ac: 02551e24 ;92 /C
+; 25522b0: 02551e68 ;93 \A
+; 25522b4: 02551ea4 ;94 |B
+; 25522b8: 02551ee0 ;95 /C
+
+;=======================================
+;text 1 dating in the park
+;=======================================
+
+;0010 MAMETCHI  +5
+
+2555680: 12,"WONT YOU GO<" ;ぼくとデート↲
+         13,"OUT WITH ME?" ;してもらえませんか?
+
+;0064 RIGHTTCHI +0
+2555699: 12,"DATE ME!WHAT" ;ぼくとデートしてほしい↲
+         12,"DO YOU SAY?"  ;んだ!オールライト?
+
+;0065 KNIGHTTCHI +1
+25556B1: 12,"HOW ABOUT WE" ;きみとふたり…デートに↲
+         13,"GO ON A DATE" ;いくしかあるまい!
+
+;0066 TACTTCHI +1
+25556CA: 13,"LETS GO OUT!" ;ボクとデートしようよ!
+
+;0067 NANDETCHI +7
+25556D7: 11,"I WANT YOU<"  ;ぼくと↲
+         12,"TO DATE ME!" ;デートしてほしいでち!
+
+;0015 KUCHIPATCHI +4
+25556EE: 11,"I WANT YOU<"  ;ぼくと↲
+         13,"TO DATCHI ME" ;デートしてほしいだっち★
+
+;0068 DOYATCHI +0
+2555706: 10,"MAYBE YOU<"   ;わいとデートして↲
+         10,"DATE ME～?"    ;くれへんかな～?
+
+;0069 GOTCHIMOTCHI -1
+255571A: 10,"MAYBE YOU<" ;ぼくとデートして↲
+          9,"DATE ME?"   ;くれないかな?
+
+;006A SHIRIMOTCHI -7
+255572D:  9,"DATE ME?" ;ぼくとデートしてみない?
+
+;006B CHARATCHI -2
+2555736: 9,"HEY★GIRL<"     ;ねえきみ★おれっちと↲
+         13,"LETS GO OUT?" ;デートしちゃってみる?
+
+;006C MONAKATCHI +7
+255574C: 11,"I WANT YOU<" ;ぼくとデートして↲
+         12,"TO DATE ME～" ;ほしいもな
+
+;006D MOGUMOGUTCHI +5
+2555763: 11,"YOU SHOULD<" ;おいらとデート↲
+         10,"DATE MOGU"   ;しようもぐ
+
+;001C SPACYTCHI +1
+2555778: 12,"WOULD YOU GO" ;ボ､ボクとデートして↲
+         13,"OUT WITH ME?" ;いただけないでしょうか?
+
+;006E KARAKUTCHI     +5
+2555791: 12,"DO YOU FEEL<" ;オレとデートしてみるきは↲
+         13,"LIKE A DATE?" ;ないか?
+
+;006F ACCHITCHI -1
+25557AA: 11,"YEEAAHHH!!<" ;よおおお～し!!↲
+         12,"LETS DATE!!" ;オレとデートしようぜ!
+
+;0070 YUMEMITCHI -5
+25557C1:  9,"DATE ME?<"    ;わたしとデートして↲
+          2,"♥"            ;ほしいの♥
+
+;0071 KIRARITCHI +4
+25557CC: 12,"GO OUT WITH<" ;あたしと↲
+          4,"ME★"          ;デートしよ★
+
+;0059 HIMESPETCHI +7
+25557DC: 11,"I WANT YOU<" ;うちとデートして↲
+         12,"TO DATE ME♥" ;ほしいの♥
+
+;0072 WALTZTCHI -4
+25557F3: 11,"MAY I TAKE<" ;とくべつにデートして↲
+          9,"YOU OUT?"    ;あげてもいいわよ?
+
+;0073 AMIAMITCHI -5
+2555807: 11,"LETS DATE♥"  ;わたしとデートして↲
+                          ;ほしいな♥
+
+;0023 MEMETCHI -7
+2555812: 9,"DATE ME?"     ;あたしとデートして↲
+                          ;くれる?
+
+;0074 CHOKOMAKATCHI -9
+255581B: 11,"LETS DATE♥" ;あたしとデートして↲
+                         ;ほしいんだ♥
+
+;0075 YUKINKOTCHI -2
+2555826: 10,"WE COULD…<" ;とデートして↲
+          8,"GO OUT…"    ;の・・・
+
+;0076 HOSHIGIRLTCHI -8
+2555838:  9,"HEY,HEY!<"  ;ねえねえ､きいてきいて!↲
+         11,"LETS DATE!" ;あたしとデートしよう!
+
+;0077 CHOCHOTCHI -2
+255584C: 12,"I WANT FUZZY" ;わたしとふわふわデートを↲
+         10,"FEELINGS!"    ;してほしいでちょ!
+
+;0078 HARPTCHI -5
+2555862: 10,"LETS GROW<" ;といっしょに↲
+          9,"TOGETHER"   ;けしたいですわ
+
+;0079 PATITCHI +3
+2555875: 11,"LETS GO ON<" ;わたしとデート↲
+          8,"A DATE!"     ;しましょう!
+
+;007A KIRAMOTCHI +0
+2555888: 10,"I WANT TO<" ;あなたとデートが↲
+         10,"DATE YOU!"  ;したいんですの★
+
+;007B FURIFURITCHI +1
+255589C: 12,"WONT YOU GO<" ;わたくしとデート↲
+         13,"OUT WITH ME?" ;してくださいますわよね?
+
+;007C AMAKUTCHI -4
+25558B5: 12,"LETS DATE～!" ;わたしとデートしよーよ～
+
+;007D JULIETCHI +0
+25558C1: 10,"I…WANT TO<" ;わたし…あなたと↲
+         10,"DATE YOU!" ;デートがしたいわ!
+
+;007E PEKOPEKOTCHI -1
+25558D5:  9,"DATE ME,<" ;わたしとデートしてぺこ!
+          6,"PEKO!"
+
+25558E4:                ;12 spare bytes
+
+;text 1 pointers
+
+25558f8: 02555680
+2555900: 02555699
+2555908: 025556B1
+2555910: 025556CA
+2555918: 025556D7
+2555920: 025556EE
+2555928: 02555706
+2555930: 0255571A
+2555938: 0255572D
+2555940: 02555736
+2555948: 0255574C
+2555950: 02555763
+2555958: 02555778
+2555960: 02555791
+2555968: 025557AA
+2555970: 025557C1
+2555978: 025557CC
+2555980: 025557DC
+2555988: 025557F3
+2555990: 02555807
+2555998: 02555812
+25559a0: 0255581B
+25559a8: 02555826
+25559b0: 02555838
+25559b8: 0255584C
+25559c0: 02555862
+25559c8: 02555875
+25559d0: 02555888
+25559d8: 0255589C
+25559e0: 025558B5
+25559e8: 025558C1
+25559f0: 025558D5
+
+;=======================================
+;marry in the park (text 2)
+;=======================================
+
+;0010 MAMETCHI -1
+25559FC:  9,"WILL YOU<"    ;ぼくとけっこんして↲
+         10,"MARRY ME?"    ;くれませんか?
+                           
+;0064 RIGHTTCHI +0         
+2555A0F: 10,"COULD YOU<"   ;ぼくとけっこんして↲
+         10,"MARRY ME?"    ;もらえるかな?
+
+;0065 KNIGHTTCHI +0
+2555A23: 12,"LET US MARRY"  ;めいよにかけてきみを↲
+         12,"WITH HONOR!"  ;しあわせにしよう!
+         
+;0066 TACTTCHI -6
+2555A3B: 10,"MARRY ME!"    ;ボクとけっこんしようよ!
+
+;0067 NANDETCHI +5
+2555A45: 12,"MARRY M…A…SO" ;ぼくとけっこんして…↲
+         13,"EMBARRASSING" ;はずかしいでち～
+
+;0015 KUCHIPATCHI +2
+2555A5E: 11,"MARRY WITH<" ;ぼくとけっこんして↲
+         11,"ME!DATCHI!"  ;ほしいだっち!
+
+;0068 DOYATCHI -7
+2555A74:  9,"I L…LOVE<"    ;ア…アンタのこと…↲
+          8,"Y…YOU!!"      ;ス…スッキやねん!!
+
+;0069 GOTCHIMOTCHI +3 (use same as Mametchi to save space)
+;2555A8C:  9,"WILL YOU<"    ;ぼくとけっこんしない↲
+;         10,"MARRY ME?"    ;かい?
+
+;006A SHIRIMOTCHI +1
+2555A85: 12,"MOTCHI WILL<" ;もっち!きみのこと↲
+         13,"MAKE U HAPPY" ;しあわせにしてみせるよ
+         
+;006B CHARATCHI +1
+2555A9E: 12,"US MARRYING…" ;おれっちときみがけっこん↲
+         13,"A NICE IDEA?" ;…チョ～よくない?
+
+;006C MONAKATCHI +7
+2555AB7: 11,"I WANT YOU<"  ;ぼくとけっこんして↲
+         12,"TO MARRY ME"  ;ほしいもな
+
+;006D MOGUMOGUTCHI +5
+2555ACE:  9,"LETS GET<"    ;おいらとけっこん↲
+         13,"MARRIED!MOGU" ;しようもぐ
+
+;001C SPACYTCHI -8
+2555AE4: 10,"PL…PLEASE<"   ;ボ､ボクとけっこんして↲
+         10,"MARRY ME?"    ;いただけないでしょうか?
+
+;006E KARAKUTCHI +5
+2555AF8: 12,"WHY DONT WE<" ;オレとけっこん↲
+         13,"GET MARRIED?" ;してみたりするか?
+
+;006F ACCHITCHI -2
+2555B11: 12,"YEAHH BABY!!" ;ぬおおお～!!↲
+         10,"MARRY ME!"    ;オレとけっこんしようぜ!
+
+;0070 YUMEMITCHI +4
+2555B27: 11,"I WANT YOU<"  ;わたしとけっこんして↲
+         13,"TO MARRY ME♥" ;ほしいの♥
+
+;0071 KIRARITCHI +4
+2555B3F: 11,"I WANT YOU<"  ;あたしとけっこんして↲
+         13,"TO MARRY ME★" ;ほしいんだ★
+
+;0059 HIMESPETCHI +0
+2555B57: 12,"♥♥GIGAKYUN♥♥" ;♥♥ギガキュン♥♥↲
+         12,"MARRY ME～♥♥"  ;うちとけっこんして～♥♥
+
+;0072 WALTZTCHI +5
+2555B6F: 12,"IM WONDERING" ;アタシとけっこんして↲
+         13,"DO WE MARRY?" ;くれないかしら!
+
+;0073 AMIAMITCHI +1  
+2555B88: 12,"PLEASE MARRY" ;わたしと↲
+          5,"ME～♥"         ;けっこんして～♥
+
+;0023 MEMETCHI +2
+2555B99:  8,"CAN YOU<"     ;あたしとけっこんして↲
+         10,"MARRY ME?"    ;くれる?
+            
+;0074 CHOKOMAKATCHI +4
+2555BAB: 12,"LOOKING FOR<" ;けっこんあいてを↲
+         12,"A HUSBAND～♥"  ;さがしてるんだ♥
+
+;0075 YUKINKOTCHI +1
+2555BC3: 12,"HEY…I WANT<"  ;あのね､わたしとけっこん↲
+         13,"US TO MARRY…" ;してほしいの・・・
+
+;0076 HOSHIGIRLTCHI -1
+2555BDC:  9,"HEY,HEY!<"    ;ねえねえ､あたしと↲
+         10,"MARRY ME!"    ;けっこんしようよ!
+
+;0077 CHOCHOTCHI +5
+2555BEF: 11,"I WANT CHU<"  ;わたしとけっこん↲
+         13,"TO MARRY ME!" ;してほしいでちょ!
+                           
+;0078 HARPTCHI -5 (use same as Mametchi to save space)
+;2555BFC:  9,"WILL YOU<"    ;わたくしとけっこんして↲
+;         10,"MARRY ME?"    ;いただけないかしら?
+
+;0079 PATITCHI +1 
+2555C07: 12,"♥LETS HAVE A" ;ウェディングケーキ↲
+         13,"WEDDING CAKE" ;いっしょにたべたいわね♥
+
+;007A KIRAMOTCHI +4 
+2555C20: 11,"I WANT YOU<"  ;わたしとけっこんして↲
+         13,"TO MARRY ME★" ;ほしいんですの★
+
+;007B FURIFURITCHI -5   
+2555C38:  9,"WILL YOU<"    ;わたくしとけっこん↲
+         10,"MARRY ME?"    ;していただけますか?
+
+;007C AMAKUTCHI +0
+2555C4B: 10,"WOULD YOU<"   ;わたしとけっこん↲
+         10,"MARRY ME?"    ;してくれるかな～
+
+;007D JULIETCHI -1
+2555C5F:  8,"PLEASE…<"     ;わたしと…↲
+         11,"MARRY ME!!"   ;けっこんしてください!
+
+;007E PEKOPEKOTCHI -1
+2555C72:  7,"PLEASE<"      ;わたしとけっこんして↲
+         12,"MARRY PEKO!"  ;ほしいぺこ!
+         
+2555C85: ;15 spare bytes
+
+2555c98: 025559FC
+2555ca0: 02555A0F
+2555ca8: 02555A23
+2555cb0: 02555A3B
+2555cb8: 02555A45
+2555cc0: 02555A5E
+2555cc8: 02555A74
+2555cd0: 025559FC ;same as mametchi
+2555cd8: 02555A85
+2555ce0: 02555A9E
+2555ce8: 02555AB7
+2555cf0: 02555ACE
+2555cf8: 02555AE4
+2555d00: 02555AF8
+2555d08: 02555B11
+2555d10: 02555B27
+2555d18: 02555B3F
+2555d20: 02555B57
+2555d28: 02555B6F
+2555d30: 02555B88
+2555d38: 02555B99
+2555d40: 02555BAB
+2555d48: 02555BC3
+2555d50: 02555BDC
+2555d58: 02555BEF
+2555d60: 025559FC ;same as mametchi
+2555d68: 02555C07
+2555d70: 02555C20
+2555d78: 02555C38
+2555d80: 02555C4B
+2555d88: 02555C5F
+2555d90: 02555C72
+
+;=======================================
+;TEXT 9 DRESS UP WISHES TODO addressing
+;=======================================
+
+2557164: 12,"I♥DRESS UP!"   ;おしゃれしてみたいで
+2557170: 13,"HM…DRESS UP…"  ;おしゃれしたいんだけ
+255717D: 13,"DRESS UP…OK?"  ;おしゃれがしたいんだ
+255718A: 10,"DRESS UP!"     ;おしゃれさせてよ!
+2557194: 13,"EH…DRESS UP?"  ;おしゃれしたいでち!
+25571A1: 13,"DRESS UPTCHI"  ;おしゃれタイムだっち
+25571AE: 13,"DRESS ME UP!"  ;おしゃれしたいねん!
+25571BB: 13,"DRESS ME UP～"  ;おしゃれがしたいなぁ
+25571C8: 13,"DRESS ME UP!"  ;おしゃれしたいのさ!
+25571D5: 13,"DRESS ME UP★"  ;おしゃれしたいっしょ
+25571E2: 10,"DRESS…UP…"     ;おしゃれしたいかもな
+25571EC: 13,"MOGU COSPLAY"  ;おしゃれしたいもぐ!
+25571F9: 12,"D…DRESS UP!"   ;お､おしゃれしたいぜ
+2557205: 10,"DRESS UP!"     ;おしゃれしたいぜ!
+255720F: 13,"YO!DRESS UP!"  ;おしゃれしたいぜええ
+255721C: 13,"DRESS ME UP♥"  ;おしゃれした～い♥
+2557229: 13,"OK,DRESS UP★"  ;おしゃれしたいなぁ★
+2557236: 12,"I♥DRESS UP～"   ;うち おしゃれした～
+2557242: 10,"DRESS UP～"     ;おしゃれしたいのよね
+255724C: 13,"OK!DRESS UP!"  ;おしゃれしたいな～
+2557259: 12,"I♥DRESS UP@"   ;おしゃれしたいの!
+2557265: 11,"DRESS UP～!"    ;おしゃれしたいんだ!
+2557270: 13,"ME…DRESS UP?"  ;おしゃれしたいの…
+255727D: 13,"DRESS ME UP!"  ;おしゃれしたいな!
+255728A: 13,"DRESS UP…OK?"  ;おしゃれしたいでちょ
+2557297: 13,"DRESS ME UP♥"  ;おしゃれがしたいです
+25572A4: 13,"DRESS UP,OK～"  ;おしゃれになりたいわ
+25572B1: 13,"DRESS UP,OK?"  ;おしゃれしたいんです
+25572BE: 13,"DRESS ME UP～"  ;おしゃれしたいですわ
+             
+25572CB: 13,"DRESS ME UP!"  ;おしゃれがしたいの!
+25572D8: 13,"COSPLAY PEKO"  ;おしゃれしたいぺこ!
+
+25572E5: ;3 spare bytes        
+
+255733c: 02557164
+2557344: 02557170
+255734c: 0255717D
+2557354: 0255718A
+255735c: 02557194
+2557364: 025571A1
+255736c: 025571AE
+2557374: 025571BB
+255737c: 025571c8
+2557384: 025571D5
+255738c: 025571E2
+2557394: 025571ec
+255739c: 025571F9
+25573a4: 02557205
+25573ac: 0255720F
+25573b4: 0255721C
+25573bc: 02557229
+25573c4: 02557236
+25573cc: 02557242
+25573d4: 0255724C ;same as 2557424
+25573dc: 02557259
+25573e4: 02557265
+25573ec: 02557270
+25573f4: 0255727D
+25573fc: 0255728A
+2557404: 02557297
+255740c: 025572A4
+2557414: 025572B1
+255741c: 025572BE
+2557424: 0255724C ;same as 25573d4
+255742c: 025572CB
+2557434: 025572D8
+ 
+;=======================================
+;OUTDOOR seasonal texts
+;=======================================
+    
+;tama pet 30 Furirabutchi months march thru november +4
+254d09c: 12,"FURI,THERES<" ;ふりふりふりっ☼[LF]
+         12,"SOMETHING…☼"  ;(なにかありそう☼)
+ 
+;tama pet 30 Furirabutchi months december thru februari -3
+254D0B4: 10,"LETS MAKE<"   ;ふりふりふりっ☼(ゆきだ[LF]
+         11,"A SNOWMAN☼"   ;るまつくろうよ☼)
+ 
+;tama pet 2C Yumekyantchi months march thru november +4
+254D0C9: 12,"KYAN,THERES<" ;ここになにか[LF]
+         12,"SOMETHING…☼"  ;あるみたいキャン☼
+ 
+;tama pet 2C Yumekyantchi months december thru februari -2
+254D0E1: 12,"KYAN,WANT A<" ;ゆきだるまつくるといいこ[LF]
+         10,"SNOWMAN?☼"    ;とあるかもキャン☼
+ 
+;tama 2F Rinsutchi months march thru november +0
+254D0F7: 12,"SURIN,THERES"	;スリンスリン～@(ここに[LF]
+         12,"SOMETHING…☼"   ;なにかありそう☼)
+ 
+;tama 2F Rinsutchi months december thru februari -1
+254D10F: 11,"LETS BUILD<"	;スリンスリン～@(ゆきだ[LF]
+         12,"A SNOWMAN～☼"   ;るまつくろうよ～☼) 
+ 
+;tama 2E pet Monatototchi months march thru november +0
+254D126: 12,"ANAN,THERES<"	;あんあーん☼(ここに[LF]
+         12,"SOMETHING…☼"   ;なにかあるかも☼)
+ 
+;tama 2E pet Monatototchi months december thru februari +0
+254D13E: 12,"ANAN,I WANT<"  ;あんあーん☼(ゆきだるま[LF]
+         12,"A SNOWMAN～☼"  ;つくりたい～☼) 
+ 
+;tama 2D pet Chapitchi months march thru november +0
+254D156: 12,"CHAPICHAPI～<"	;チャピチャピ～☼[LF]
+         12,"WHATS HERE?"   ;(なにかあるかも～☼) 
+ 
+;tama 2D pet Chapitchi months december thru februari -4
+254D16E: 12,"I WANNA MAKE"	;チャピチャピ～☼(ゆきだ[LF]
+         12,"A SNOWMAN～☼"	;るまつくってみて～☼)
+
+254D186: ;2 spare bytes
+		 
+254d3dc: 0254d09c ;tama #30 (mar ... nov)
+254d3e0: 0254D0B4 ;tama #30 (dec,jan,feb) 
+254d3e4: 0254D0C9 ;tama 2C (mar ... nov)
+254d3e8: 0254D0E1 ;tama 2C (dec,jan,feb) 
+254d3ec: 0254D0F7 ;tama 2F (mar ... nov)
+254d3f0: 0254D10F ;tama 2F (dec,jan,feb) 
+254d3f4: 0254D126 ;tama 2E (mar ... nov)
+254d3f8: 0254D13E ;tama 2E (dec,jan,feb) 
+254d3fc: 0254D156 ;tama 2D (mar ... nov)
+254d400: 0254D16E ;tama 2D (dec,jan,feb) 
+		 
+;0B bought food from foodcart special case
+254D79C: 12,"HAVE ANOTHER" ;オマケするからふたりで↲
+         13,"&COME AGAIN!" ;なかよくたべてね♥      
+		 
+;=======================================
+;game over and friend letters texts
+;=======================================
+
+;19 character mail message
+;2559398: 05 14 23 42 11 FF ;おともだち[LF] (replaced by 5 character friend name)
+255939E: 13,"SEND A MAIL☼"  ;からでんごんだよ～☼ 
+
+241A2E4: 6D38 ;ld.w     %r8,0x11+2 ;change above message length from 17 to 19 chars
+
+;tamagotchi left game over text (2x9 chars + 3x13 chars)
+
+255963c:  7,"I WISH<"       ;もっといっしょにい[LF]
+          9,"YOU WERE<"     ;てくれたら､こんな[LF]
+         13,"AROUND MORE…<" ;けつだんをせずにすんだかも[LF]
+         13,"NEXT TIME WE<" ;…こんどあえたらそのときは[LF]
+         14,"PLAY MORE OK?" ;もっともっとあそぼうね……
+ 
+;8 random friend texts (5 lines x7 chars each)
+;
+;255967c: 3b 2e 07 51 5d 0a 19 ff            ;げんきー?この[LF]
+;         01 02 42 1a 88 51 0c ff            ;あいだはツーし[LF]
+;         2e 10 19 0c 06 34 10 ff            ;んたのしかった[LF]
+;         18 67 1f 10 40 34 10 ff            ;ね↑またぜった[LF]
+;         02 0c 26 03 18 5c 00 00            ;いしようね!
+;
+;25596a4: 87 ab 7b 5c 14 13 23 ff            ;チャオ!とても[LF]
+;         0d 13 07 15 77 78 89 ff            ;すてきなアイテ[LF]
+;         97 2d 13 16 02 2a 10 ff            ;ムをてにいれた[LF]
+;         06 27 0a 2e 46 01 3b ff            ;からこんどあげ[LF]
+;         16 02 08 18 67 67 00 00            ;にいくね↑↑
+;
+;25596CC: 24 34 1E 51 62 FF                  ;やっほー☼[LF]
+;         0A 2E 46 0F 34 11 16 FF            ;こんどそっちに[LF]
+;         01 0F 48 16 02 0A 03 FF            ;あそびにいこう[LF]
+;         14 05 23 34 13 29 26 FF            ;とおもってるよ[LF]
+;         5C 1F 34 13 13 18 67 00 00 00      ;!まっててね↑
+;
+;25596F4: 90 A1 51 67 7D 96 14 FF            ;ハロー↑キミと[LF]
+;        01 0F 2E 42 1B 19 0A FF             ;あそんだひのこ[LF]
+;        14 2D 04 16 34 07 16 FF             ;とをえにっきに[LF]
+;        06 02 10 26 5C 0A 2E FF             ;かいたよ!こん[LF]
+;        46 20 16 07 13 18 65 00             ;どみにきてね♪
+;
+;255971C: 0A 19 1F 04 1A FF                  ;このまえは[LF]
+;         01 0F 2E 45 08 2A 13 FF            ;あそんでくれて[LF]
+;         01 28 38 14 03 5C FF               ;ありがとう![LF]
+;         0A 2E 46 05 20 24 3B FF            ;こんどおみやげ[LF]
+;         23 34 13 02 08 18 61 00 00 00 00   ;もっていくね♥
+;
+;2559744: 18 04 61 0A 2E 46 FF               ;ねえ♥こんど[LF]
+;         02 34 0C 37 16 05 46 FF            ;いっしょにおど[LF]
+;         03 3A 12 06 34 11 35 FF            ;うぐつかっちゃ[LF]
+;         05 51 5C 24 08 0F 08 FF            ;おー!やくそく[LF]
+;         42 26 67 67 00                     ;だよ↑↑
+;
+;2559768: 0C 34 13 29 5D FF                  ;しってる?[LF]
+;         77 78 89 97 2D 01 3B FF            ;アイテムをあげ[LF]
+;         29 14 02 02 0A 14 38 FF            ;るといいことが[LF]
+;         01 29 2E 42 34 13 63 FF            ;あるんだって★[LF]
+;         10 22 0C 13 20 26 51 00 00 00      ;ためしてみよー
+;
+;2559790: 83 86 A4 C4 0A 03 06 FF            ;スタンプこうか[LF]
+;         2E 2D 0D 29 14 77 78 FF            ;んをするとアイ[LF]
+;         89 97 38 23 27 04 29 FF            ;テムがもらえる[LF]
+;         2E 42 34 13 5C 24 28 FF            ;んだって!やり[LF]
+;         10 02 26 18 65 65 00 00            ;たいよね♪♪
+
+;=======================================
+;TODO extend easter egg screen with credits
+;=======================================
+
+;ENGLISH FAN
+;TRANSLATION
+;
+;CODE AND 
+;DESIGN BY…
+;
+;MR.BLINKY
+;
+;ENGLISH
+;ARTWORK BY…
+;
+;MR.BLINKY,
+;MYIKO,RA.
+;
+;TRANSLATIONS
+;BY…
+;
+;WA,
+;YEAR7AFROKID
+;MR.BLINKY
+;..
+;ATASHI
+;..
+;
+
+;FOR MORE<
+;INFORMATION
+
+;VISIT TAMA-<
+;ZONE.COM

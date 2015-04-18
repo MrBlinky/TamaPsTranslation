@@ -1,0 +1,1320 @@
+﻿;Tamagotchi P's text patch script by Mr.Blinky June/July 2014
+;-------------------------------------------------------------------------------
+
+;script for patch: EP003-F1 (Firmware V1 / VER56 2012-11-03)
+
+;revision: 1
+
+;Script Info:
+;------------
+
+;script file format must be UTF-8 (when non ASCII characters are used)
+;Use ';' (semicolon) for remarks
+
+;syntax (without the semicolon):
+
+;02000000:   Set current rom address to 02000000 hexadecimal
+;8,"TEXT"    First zero out 8 bytes at current address and then write string at current address
+;00          write byte 00 at current address
+;0000        write (half)word at current address
+;00000000    write long (word) at current address
+;00 0000 00  write byte, (half)word, byte at current address
+;R7=02000000 store 6 byte instruction xld.w r7,02000000 (any register r0..r14 can be used)
+;> "ITEM"    Zero out 10 character item name, writes the string to current address and fixes the items checksum
+
+;Note: all numbers are hexadecimal except the length number of strings
+
+;Use any of the folowing characters in strings:
+; hiragana: あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやゆよらりるれろわをんぁぃぅぇぉっゃゅょがぎぐげござじずぜぞだぢづでどばびぶべぼぱぴぷぺぽ
+; katakana: アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲンァィゥェォッャュョガギグゲゴザジズゼゾダヂヅデドバビブベボパピプペポ
+; symbols:  ー～…､｡()｢｣.・!?&◯☓♥☼★@♪╬↑↓→←$
+; numbers:  0123456789
+; roman:    ABCDEFGHIJKLMNOPQRSTUVWXYZi_
+; special:  use 'ー' for hyphen
+;           use '<' for new line
+
+;NOTE: using any other character then those above will result in a 0 terminator being used.
+
+;=======================================
+;EP002 improvements
+;=======================================
+
+;remove clothes/accesoires text (EP002 improved translation) V
+254ABB1: 7,"UNWEAR"     ;はずす remove (relocated-3)
+24046AE: R9=0254ABB1    ;relocated remove
+
+;school sports test text (EP002 improved translation) V
+2536F24: 12,"RUN 100 LAPS" ;しゅうごー!おくれたら
+2536F30: 16,"AND BE FAST!"   ;こうてい100しゅうだ!
+
+;deco pierce dialog 0D: menu icon background changed (not used, but included anyway) V
+2557e30: 12,"MENU ICON" ;アイコンバックが
+2557e3c: 12,"CHANGED!"  ;ついかされました!
+
+;=======================================
+;Dai outlook
+;=======================================
+
+;outlook - beach rundown 2 line balloon text V
+2536fac: 16,"1000 BEACH"   ;すなはま1000おうふく
+2536fbc: 16,"RUNS!WAAAAH!" ;だあああああああ!!!!
+
+;=======================================
+;park proposal
+;=======================================
+
+;marry in the park reject boy text (20 bytes) V
+2551cb8: 11,"THANKS★BUT<" ;ありがとう★でも[LF] (+2)
+          9,"IM SORRY"     ;ごめんなさい・・・@   (-2)
+
+;marry in the park reject girl text (20 bytes) V
+2551CCC: 10,"IM SORRY@<"  ;ごめんなさい@[LF] (+2)
+         10,"I REFUSE↓"   ;おことわりします↓   (+2,-2)
+
+;=======================================
+;park job completed text
+;=======================================
+
+;marry/dating make your choice 1/2 text (relocated from EP002 to allocate space for longer job text) V
+2536E78: 16,"DID YOU FIND"  ;このみのタイプはいました (no change)
+;2536e88:  4,"♥?"           ;か? (don't change use 'LOVE?' below)
+248571a: R7=2536E9E         ;\
+24857aa: R7=2536E9E         ; | point to 'LOVE?' below
+2485832: R7=2536E9E         ; |
+24858c2: R7=2536E9E         ; |
+248594a: R7=2536E9E         ; |
+24859da: R7=2536E9E         ;/
+
+;marry/dating make your choice 1/2 text (relocated from EP002 to allocate space for longer job text) V
+2536E8C: 12,"THE ONE YOU"  ;どのたまごっちにするか
+2536E98: 12,"TRULY LOVE?"  ;きめてくださいね｡ (note 'LOVE?' used above too)
+2485bde: R7=02536E98       ;relocate -4
+2485c6e: R7=02536E98
+2485cf6: R7=02536E98
+2485d86: R7=02536E98
+2485e1a: R7=02536E98
+2485eaa: R7=02536E98
+
+;matchmaker marry option V
+2552318: 8,"MARRY?" ;おみあい Marry?
+
+;park cleanup job completed text V
+2536EA4: 12,"GOOD WORK!" ;おつかれさま!  (relocated -4)
+2536EB0: 12,"TAKE THIS…" ;これをどうぞー!
+248c3e2: R7=02536EA4     ;relocate -4
+248c46e: R7=02536EA4
+248c4f2: R7=02536EA4
+248c57e: R7=02536EA4
+248c616: R7=02536EA4
+
+;=======================================
+;Eco town
+;=======================================
+
+;eco town random text 1 V
+2551BBC: 10,"THE WIND､<"    ;ふうりょく､すいりょく[LF]     (-2)
+         11,"SUN､WATER､<"   ; たいようっち､かりょく…[LF]   (-2)
+         10,"CAN POWER<"    ;はつでんにもいろいろある[LF] (-3)
+         13,"MANY THINGS…<" ;けど､じぶんのちからで[LF]   (+1)
+         13,"SELFーPOWERED<" ;はつでんするのがいちばん[LF] (0)
+         13,"IS THE BEST!"  ;エコだでん!               (+4)
+
+;eco town random text 2 V
+2551c04: 12,"ECOLOGY CAN<" ;かたちだけのエコロジーは[LF] (-1)
+         10,"HAVE MANY<"   ;あくえいきょうなことも[LF]    (-2)
+         10,"DIFFERENT<"   ;あるぱな…[LF]           (+4)
+          9,"IMPACTS…<"    ;ただしいちしきに[LF]       (0)
+          9,"SO DO IT<"    ;もとづいたエコロジーを[LF]   (-3)
+          7,"RIGHT☼"       ;こころがけてほしいぱな☼ 16  (-9)
+
+;eco town random text 3 V
+2551C48: 12,"MY FARM USES" ;ぼくののうじょうでは[LF]  +1
+          9,"ONLY THE<"    ;ゆうきひりょうを[LF]
+         12,"BEST ORGANIC" ;つかっているんだもー[LF]  +1
+         11,"FERTILISER<"  ;ふんをそのままではなく[LF] -1
+         12,"LIKE COMPOST" ;｢たいひ｣というものに[LF]
+         12,"AND MANURE☼"  ;してからまくんだもー☼      -1
+
+;eco car text V
+254D95C: 11,"YOU WON AN<" ;おめでとー!!![LF]
+         13,"ECO CAR!!!"  ;エコカーをプレゼント
+
+;eco bag text V
+254D974: 7,"A COOL<"       ;エコバッグを[LF]
+         9,"ECO BAG!"      ;プレゼントだよー
+
+;eco scoop text V
+254D984:  8,"A HANDY<"     ;エコスコップを[LF]
+         12,"ECO SCOOP!"   ;プレゼントだよー
+
+;=======================================
+;Secret base
+;=======================================
+
+;principal omen (dream rocket) 2 line text balloon V
+2536df0: 12,"LETS FLY TO"  ;みんなのゆめをのせて､
+2536dfc: 12,"THE ★STARS★!" ;しゅっぱ～つ★
+
+;rocket lift-off 5 char balloon text V
+2536FFC: 8,"GO!" ;はっしゃ! (launch! won't fit inside the 5 char balloon)
+
+;=======================================
+;Fun park bonus item
+;=======================================
+
+;fun park 2 kirabag line text balloon V
+2536FCC: 16,"THIS GIFT…"  ;みんなにはないしょだよ… (line 2)
+2536FDC: 16,"PLEASE TAKE" ;このバッグをあげようかね (line 1)
+
+;=======================================
+;Dream fountain (get item)
+;=======================================
+
+;dream fountain item intro 2 line text balloon V
+2536e08: 12,"THIS MUST BE" ;あなたがおとしたのは (-4)
+2536E14: 12,"YOURS､RIGHT?" ;どちらですか? (-4,+4)
+2481dbe: R7=02536E14       ;line 2 relocate -4
+2481e70: R7=02536E14       ;line 2 relocate -4
+2481f2a: R7=02536E14       ;line 2 relocate -4
+2481fe4: R7=02536E14       ;line 2 relocate -4
+24820a0: R7=02536E14       ;line 2 relocate -4
+2482154: R7=02536E14       ;line 2 relocate -4
+
+;item menu V
+255337c: 08,"CHOOSE"       ;あなたが
+2553384: 08,"YOURS"        ;おとしたのは
+
+;dream fountain accept item 2 line text balloon V
+2536E20: 16,"HERE…PLEASE" ;しょうじきもののあなたに
+2536E30: 16,"TAKE BOTH"   ;はふたつともあげましょう
+
+;dream fountain reject item 2 line text balloon V
+2536E40: 16,"…I REMEMBER" ;ウフフ…じぶんのもちもの
+2536E50: 16,"WHOSE IT IS…" ;はよくおぼえておいてね…
+
+;=======================================
+;Connect play
+;=======================================
+
+;connect play message (shows in hearts text balloon) V
+254C55C: 12,"LETS PLAY"  ;ひとりのおうちに
+254C568: 12,"TOGETHER!!" ;しゅうごうしよう!!
+
+;connect play ending text V
+254A650: 8,"♥DIARY♥"  ;♥てちょう♥ (patch requires xpos change)
+254A658: 8,"UPDATE…"  ;こうしんちゅう
+2516b62: 6dc9 ;ld.w    %r9,0x22-6 ;x "♥DIARY♥" (-0x352)
+
+;=======================================
+;STAMP card messages
+;=======================================
+
+;stamp card message texts V
+2539BD4: 12,"NO STAMP"          ;スタンプカードを (no new x pos required)
+2539BE0: 12," CARD!"            ;もっていないよ! (space = +12 pixels)
+2500d00: 6dc9 ;ld.w    %r9,0x1C ;x+3*6 for "CARD!" (-0x33A)
+
+;no stamp collected V
+2539BEC: 12,"YOU DID"           ;このともだちからは
+2539BF8: 12,"NOT GET A"         ;スタンプをおして
+2539C04:  8," STAMP!"           ;もらえないよ!   (space +12 pixels)
+2500d48: 6dc9 ;ld.w    %r9,0x1c ;x+2*6 for "YOU DID" (-0x33A)
+2500d58: 6d09 ;ld.w    %r9,0x10 ;x-6 for "NOT GET A" (-0x33A)
+2500d6a: 6d69 ;ld.w    %r9,0x16 ;x-6 for " STAMP!"   (-0x33A)
+
+;=======================================
+;birthday texts (birtday card balloon text)
+;=======================================
+
+;new birthday texts (max 9 alpha chars extra end symbols are allowed)
+2555e2c: 10,"BIRTHDAY?"
+2555E36: 10,"BIRTHDAY!"
+2555E40: 11,"BIRTHDAY!!"
+2555E4B: 12,"BIRTHDAY～!!"
+2555E57: 10,"BIRTHDAY～"
+2555E61: 10,"BIRTHDAY★"
+2555E6B: 10,"BIRTHDAY♥"
+2555E75: 10,"BIRTHDAY…"
+2555E7F: 10,"BIRTHDAY♪"
+2555E89:  9,"BIRTHDAY"
+
+;2555E92-2555FE7 free unused birthday text (342 bytes)
+
+;birthday text address table
+2555FEC: 02555E4B ;"BIRTHDAY～!!"
+2555FF4: 02555E4B ;"BIRTHDAY～!!"
+2555FFC: 02555E4B ;"BIRTHDAY～!!"
+2556004: 02555E4B ;"BIRTHDAY～!!"
+255600C: 02555E4B ;"BIRTHDAY～!!"
+2556014: 02555E4B ;"BIRTHDAY～!!"
+255601C: 02555E40 ;"BIRTHDAY!!"
+2556024: 02555E40 ;"BIRTHDAY!!"
+255602C: 02555E40 ;"BIRTHDAY!!"
+2556034: 02555E40 ;"BIRTHDAY!!"
+255603C: 02555E40 ;"BIRTHDAY!!"
+2556044: 02555E61 ;"BIRTHDAY★"
+255604C: 02555E36 ;"BIRTHDAY!"
+2556054: 02555E36 ;"BIRTHDAY!"
+255605C: 02555E36 ;"BIRTHDAY!"
+2556064: 02555E40 ;"BIRTHDAY!!"
+255606C: 02555E36 ;"BIRTHDAY!"
+2556074: 02555E89 ;"BIRTHDAY"
+255607C: 02555E89 ;"BIRTHDAY"
+2556084: 02555E61 ;"BIRTHDAY★"
+255608C: 02555E57 ;"BIRTHDAY～"
+2556094: 02555E89 ;"BIRTHDAY"
+255609C: 02555E36 ;"BIRTHDAY!"
+25560A4: 02555e2c ;"BIRTHDAY?"
+25560AC: 02555E36 ;"BIRTHDAY!"
+25560B4: 02555E6B ;"BIRTHDAY♥"
+25560BC: 02555E61 ;"BIRTHDAY★"
+25560C4: 02555E36 ;"BIRTHDAY!"
+25560CC: 02555E89 ;"BIRTHDAY"
+25560D4: 02555E36 ;"BIRTHDAY!"
+25560DC: 02555E36 ;"BIRTHDAY!"
+25560E4: 02555E36 ;"BIRTHDAY!"
+25560EC: 02555E75 ;"BIRTHDAY…"
+25560F4: 02555E89 ;"BIRTHDAY"
+25560FC: 02555E36 ;"BIRTHDAY!"
+2556104: 02555E7F ;"BIRTHDAY♪"
+255610C: 02555E36 ;"BIRTHDAY!"
+2556114: 02555E61 ;"BIRTHDAY★"
+255611C: 02555E36 ;"BIRTHDAY!"
+2556124: 02555E57 ;"BIRTHDAY～"
+255612C: 02555E36 ;"BIRTHDAY!"
+2556134: 02555E36 ;"BIRTHDAY!"
+
+;2555E92-2555FE7 free unused birthday text (342 bytes)
+
+;=======================================
+;Matchmaker texts V
+;=======================================
+
+;+0
+2555a2c: 12,"IM MAMETCHI!" ;まめっちです!はつめいは↲
+2555A38: 12,"AN INVENTOR!" ;まかせてください!
+
+;+0
+2555A44: 12,"IM RIGHTTCHI" ;ライトっちだよ★↲
+2555A50: 12,"JUST ASK ME!" ;なんでもしつもんしてね!
+
+;+0
+2555A5C: 12,"I KNIGHTTCHI" ;ナイトっちだ!↲
+2555A68: 12,"WILL PROTECT" ;おれがきみをまもろう!
+
+;+4
+2555A74: 12,"IM TACTTCHI!" ;タクトっちだよ!↲
+2555A80: 12,"RELY ON ME!" ;たよりにしてね!
+
+;+8
+2555A8C: 12,"IM NANDETCHI" ;ボクは なんでっち!↲
+2555A98:  7,"HELLO!"       ;よろしくでち～!
+
+;+7
+2555A9F: 12,"KUCHIPATCHI!" ;くちぱっちだっち!ぼくと↲
+2555AAB: 11,"FOOD TCHI!"   ;のんびりしようだっち★
+
+;+2
+2555AB6: 12,"IM DOYATCHI!" ;どやっちやで!↲
+2555AC2: 10,"IM FUNNY!"    ;オモロいことしようや!
+
+;+4
+2555ACC: 12,"GOTCHIMOTCHI" ;ごっちもっちだよ↲
+2555AD8: 12,"HAPPY WE MET" ;あえてうれしいな
+
+;+8
+2555AE4: 12,"SHIRIMOTCHI!" ;しりもっちだよ いっしょ↲
+2555AF0: 12,"LETS EXPLORE" ;にぼうけんしよう!
+
+;+8
+2555AFC: 12,"IM CHARATCHI" ;チャラっちっス♥きみを↲
+2555B08: 12,"YOU LOVE ME!" ;すきになっちゃったワケ!
+
+;+4
+2555B14: 12,"MONAKATCHI!<" ;もなかっちもな きみは↲
+2555B20: 11,"♥REDBEANS?"   ;あんこがすきもな?
+
+;+3
+2555B2B: 12,"MOGUMOGUTCHI" ;もぐもぐっちもぐ↲
+2555B37: 10,"LETS EAT!"    ;いっしょにたべるもぐ!
+
+;+1
+2555B41: 12,"S…SPACYTCHI<" ;ス…スペイシーっちです↲
+2555B4D: 12,"H…HE…HELLO!"  ;よ､よ､よろしく
+
+;+1
+2555B59: 12,"KARAKUTCHI!<" ;からくっちだ!オレ､↲
+2555B65: 12,"IM A HOT GUY" ;ホットなおとこだぜ!
+
+;+1
+2555B71: 11,"ACCHITCHI!<"  ;あっちっちだぜ!オレいま↲
+2555B7C: 13,"IM ON FIRE!" ;アツいかもだぜ!
+
+;+1
+2555B89: 12,"YUMEMITCHI!<"  ;ゆめみっちよ♪↲
+2555B95: 12,"YOU♥RIBBONS?" ;リボンがおきにいりなの♥
+
+;+1
+2555BA1: 12,"KIRARITCHI!I" ;キラリっちだよ!このアク↲
+2555BAD: 12,"MADE MY HAT!" ;セ★あたしがつくったんだ
+
+;-3
+2555BB9: 12,"HIMESPETCHI!" ;うち､ひめスペっち♪↲
+2555BC5: 12,"LETS BE GOOD" ;なかよくしよーね↑
+
+;-3
+2555BD1: 12,"IM WALTZTCHI" ;ワルツっちよ!かんたんに↲
+2555BDD: 12,"YOU LIKE ME!" ;スキにならないんだから!
+
+;-7
+2555BE9: 12,"AMIAMITCHI!<" ;あみあみっちだよ!↲
+2555BF5: 12,"I LOVE TOYS!" ;あみものがだいすきなの!
+
+;-7
+2555C01: 12,"IM MEMETCHI<" ;めめっちよ!ぐるぐる↲
+2555C0D: 12,"YOU♥MY CURL?" ;がキュートでしょ?
+
+;-7
+2555C19: 12,"IM CHOKOMAKA" ;ちょこまかっちなんだ!↲
+2555C25: 12,"TCHI.I WANT♥" ;♥をさがしにきたんだ
+
+;-7
+2555C31: 12,"YUKINKOTCHI…" ;ゆきんこっちなの…↲
+2555C3D:  7,"HELLO…"       ;おはだがじまんなの…
+
+;-12
+2555C44: 12,"IM HOSHIGIRL" ;ほしガールっちだよ♪↲
+2555C50: 12,"TCHI♪ & YOU?" ;おはなしきかせて!
+
+;-12
+2555C5C: 12,"CHOCHOTCHI!<" ;ちょーちょっちよ!↲
+2555C68: 12,"GO WITH ME!"  ;おさんぽするでちょ!
+
+;-12
+2555C74: 12,"IM HARPTCHI!" ;ハープっちですわ♪↲
+2555C80: 12,"YOU LIKE ME"  ;いっきょくいかがかしら?
+
+;-12
+2555C8C: 12,"IM PATITCHI!" ;パティっちです!↲
+2555C98: 12,"I LOVE CAKES" ;パティシエになりたいわ!
+
+;-12
+2555CA4: 12,"KIRAMOTCHI★<" ;キラもっちですの★↲
+2555CB0: 12,"I LOVE ART!"  ;アートがバクハツですの!
+
+;-12
+2555CBC: 12,"FURIFURITCHI" ;ごきげんよう!↲
+2555CC8: 10,"GOOD DAY!"    ;ふりふりっちですわ
+
+;-10
+2555CD2: 12,"IM AMAKUTCHI" ;あまくっちだよ～ ケーキ↲
+2555CDE: 12,"I LOVE CAKES" ;やさんになりたいな～
+
+;-10
+2555CEA: 12,"IM JULIETCHI" ;ジュリエっちよ↲
+2555CF6: 12,"AN ACTRESS!"  ;えんぎにはじしんがあるわ
+
+;-10
+2555D02: 12,"PEKOPEKOTCHI" ;ぺこぺこっちぺこ!↲
+2555D0E: 11,"IM HUNGRY!"   ;ごはんたべにいこうぺこ!
+
+;2555D19: 11,"<<<<<<<<<<<"  ;blank filler
+
+;Matchmaker text address table V
+2555d28: 02555a2c
+2555d30: 02555A44
+2555d38: 02555A5C
+2555d40: 02555A74
+2555d48: 02555A8C
+2555d50: 02555A9F
+2555d58: 02555AB6
+2555d60: 02555ACC
+2555d68: 02555AE4
+2555d70: 02555AFC
+2555d78: 02555B14
+2555d80: 02555B2B
+2555d88: 02555B41
+2555d90: 02555B59
+2555d98: 02555B71
+2555da0: 02555B89
+2555da8: 02555BA1
+2555db0: 02555BB9
+2555db8: 02555BD1
+2555dc0: 02555BE9
+2555dc8: 02555C01
+2555dd0: 02555C19
+2555dd8: 02555C31
+2555de0: 02555C44
+2555de8: 02555C5C
+2555df0: 02555C74
+2555df8: 02555C8C
+2555e00: 02555CA4
+2555e08: 02555CBC
+2555e10: 02555CD2
+2555e18: 02555CEA
+2555e20: 02555D02
+
+;=======================================
+;Tamagotchi hungry texts V
+;=======================================
+
+2556544: 11,"IM HUNGRY!"    ;おなかがすきました!
+255654F: 11,"IM HUNGRY～"   ;おなかすいちゃったな～
+255655A: 12,"TIME TO EAT?"  ;ごはんにしようじゃないか
+2556566: 10,"LETS EAT!"     ;ごはんにしようよ!
+2556570: 11,"IM HUNGRY…"    ;はらぺこでち…
+255657B: 12,"FOOD TCHI!!"   ;おなかペコペコだっち!!
+2556587:  8,"HUNGRY…"       ;はらへったなぁ…
+255658F: 12,"TIME TO EAT?"  ;しょくじはまだなのかい?
+255659B: 12,"I WANT FOOD"   ;ごはんのよういをしてね
+25565A7: 12,"IM SO HUNGRY"  ;おなかすいたっしょ!
+25565B3: 10,"IM HUNGRY"     ;おなかがすいてきたかも…
+25565BD: 12,"NEED TO CHEW"  ;くちのなかなにもないもぐ
+25565C9: 12,"IM SO HUNGRY"  ;ハラがへりすぎだぜ…
+25565D5: 12,"A BIT HUNGRY"  ;ハラペコなんだけど
+25565E1: 12,"IM HUNGRYYYY"  ;おなかがすいたあああ～!
+25565ED: 11,"IM HUNGRY♥"    ;おなかすいちゃったの♥
+25565F8: 11,"IM HUNGRY★"    ;おなかすいちゃった★
+2556603: 12,"CAN WE EAT?"   ;ごはんまだなの?
+255660F: 12,"TIME TO EAT?"  ;ごはんはまだなの?
+255661B: 12,"IM HUNGRY～"   ;おなかすいたよ～
+2556627: 12,"WHERES FOOD?"  ;ごはんのじかんじゃない?
+2556633: 10,"IM HUNGRY"     ;ごはんをさがしてるんだ
+255663D: 12,"IM SO HUNGRY"  ;おなかがすいたの…
+2556649: 11,"IM HUNGRY!"    ;おなかすいちゃったよ!
+2556654: 10,"MY TUMMY…"     ;おなかすいたでちょ…
+255665E: 12,"TIME TO EAT?"  ;しょくじはまだかしら?
+255666A: 11,"IM HUNGRY…"    ;おなかすいたわよね…
+2556675: 12,"TIME TO EAT…"  ;おなかがすいたんですの…
+2556681: 12,"NO FOOD YET?"  ;おしょくじまだですの?
+255668D: 12,"QUITE HUNGRY"  ;おなかすいたな～
+2556699: 10,"IM HUNGRY"     ;おなかがすいたわ…
+25566A3: 12,"PEKO HUNGRY!"  ;おなかぺこぺこぺこ!
+
+;25566AF-25566DF: (49 bytes free)
+
+;hungry text address table V
+2556734: 02556544
+255673c: 0255654F
+2556744: 0255655A
+255674c: 02556566
+2556754: 02556570
+255675c: 0255657B
+2556764: 02556587
+255676c: 0255658F
+2556774: 0255659B
+255677c: 025565A7
+2556784: 025565B3
+255678c: 025565BD
+2556794: 025565C9
+255679c: 025565D5
+25567a4: 025565E1
+25567ac: 025565ED
+25567b4: 025565F8
+25567bc: 02556603
+25567c4: 0255660F
+25567cc: 0255661B
+25567d4: 02556627
+25567dc: 02556633
+25567e4: 0255663D
+25567ec: 02556649
+25567f4: 02556654
+25567fc: 0255665E
+2556804: 0255666A
+255680c: 02556675
+2556814: 02556681
+255681c: 0255668D
+2556824: 02556699
+255682c: 025566A3
+
+;25566AF-25566DF: (49 bytes free)
+
+;=======================================
+;snack texts V
+;=======================================
+
+;occupies same space,no table changes needed
+2556838: 12,"SNACKS OK～"    ;おやつたべたいですね～
+2556844: 12,"SNACKS…"       ;おやつがたべたいな
+2556850: 12,"SNACK HERE!"   ;おやつがたべたいぞ!
+255685C: 12,"LETS SNACK!"   ;おやつにしようよ!
+2556868: 12,"SNACKS"        ;おやつたべたいでち!
+2556874: 12,"SNACK TCHIME"   ;おやつのじかんだっち!
+2556880: 12,"NO SNACKS?"    ;おやつまだなん?
+255688C: 12,"NO SNACKS?"    ;おやつはないのかい?
+2556898: 12,"WANT SNACK!"   ;おやつがたべたいのさ!
+25568A4: 12,"HAVE SNACKS?"  ;おやつくれないんスか?
+25568B0: 12,"WANT SNACKS!"  ;おやつたべたいもな!
+25568BC: 12,"MOGU SNACKS?"  ;おやつたべたいもぐ!
+25568C8: 12,"SNACK PLEASE"  ;おやつをたのむぜ!
+25568D4: 12,"SNACK TIME!"   ;おやつのじかんだろ!
+25568E0: 16,"YO, SNACKS!"   ;おやつたべたいぜええ～!
+25568F0: 12,"WANT SWEETS♥"  ;スイーツたべたいの♥
+25568FC: 12,"WANT SWEETS★"  ;スイーツたべたいな★
+2556908: 16,"WANT SNACK!"   ;うち おやつたべたーい!
+2556918: 16,"SNACKS OK?"    ;おやつがたべたいのよね!
+2556928: 12,"WANT SNACK～～"  ;おやつたべたいよ～
+2556934: 16,"SNACKS OK～?"   ;おやつがたべたいのよね～
+2556944: 12,"SNACK?WHERE?"  ;おやつはどこなんだ?
+2556950: 12,"WANT SNACK…"   ;おやつがたべたいの…
+255695C: 16,"WANT SNACK～!"  ;おやつがたべたいんだ～!
+255696C: 12,"SOME SWEETS!"  ;おかしたべたいでちょ!
+2556978: 12,"LETS DO TEA!"  ;おちゃにしません?
+2556984: 16,"SOME SWEETS?"  ;スイーツがたべたいわね～
+2556994: 16,"WANT SNACKS"   ;おやつがたべたいんですの
+25569A4: 16,"SWEETS TIME!"  ;スイーツのじかんですわ!
+25569B4: 16,"SWEET SNACK?"  ;あま～いおやつたべた～い
+25569C4: 12,"SNACK PLEASE"  ;おやつがたべたいわ
+25569D0: 16,"PEKO SNACK?"   ;おやつたべたいぺこ!
+
+;=======================================
+;play texts V
+;=======================================
+
+2556b34: 12,"LETS PLAY!"   ;あそびましょう!
+2556B40: 12,"WANNA PLAY!"  ;あそびたいなぁ!
+2556B4C: 12,"WANNA PLAY?!" ;あそぼうではないか!
+2556B58: 12,"LETS PLAY!";  ;あそぼうよ!
+2556B64: 12,"WANNA PLAY!"  ;あそびたいでち!
+2556B70: 12,"PLAY-TCHI!"   ;あそびたいだっち!
+2556B7C: 12,"PLAY WITH ME" ;わいとあそばへん?
+2556B7C: 12,"PLAY WITH ME" ;あそんでくれないかな?(english dupe)
+2556B88: 12,"WANNA PLAY!!" ;あそびたいのさ!
+2556B94: 12,"TIME TO PLAY" ;あそびタイムじゃな～い?
+2556BA0: 12,"WANNA PLAY!"  ;あそびたいもな!
+2556BAC: 12,"MOGU PLAY!"   ;あそびたいもぐ!
+2556BB8: 12,"NOW WE PLAY!" ;いまからあそぼうぜ!
+2556BC4: 12,"WANNA PLAY!!" ;あそびたいぜ!
+2556BD0: 12,"LETS PLAY YO" ;あそぼうぜえええ～!!
+2556BDC: 12,"WANNA PLAY♥"  ;あそびたいの♥
+2556BE8: 12,"WANNA PLAY★"  ;あそびたいよ★
+2556BF4: 12,"PLAY WITH ME" ;うちとあそぼうよ!
+2556BF4: 12,"PLAY WITH ME" ;アタシとあそびなさいよ!(english dupe)
+2556C00: 12,"LETS PLAY～!"  ;あそぼうよ～
+2556C0C: 12,"LETS PLAAYY!" ;あそびましょーよ!
+2556C18: 12,"WANNA PLAY!!" ;あそびたいんだ!
+2556C24: 12,"WANNA PLAY…"  ;わたし､あそびたいの…
+2556C30: 12,"WANNA PLAYY!" ;あそびた～い!
+2556C3C: 12,"PLAY WITH ME" ;あそんでほしいでちょ!
+2556C48: 12,"I AM BORED"   ;たいくつですわ
+2556C54: 12,"LETS PLAY!"   ;あそびましょうよ!
+2556C60: 12,"PLAY WITH ME" ;あそんでほしいですの…
+2556C6C: 12,"I AM BORED～"  ;たいくつですわ～
+2556C78: 12,"PLAY～ING～?"   ;あ～そ～ん～で～
+2556C84: 12,"IM FREE…"     ;ひまだわ…
+2556C90: 12,"PLAY? PEKO"   ;あそんでほしいぺこ!
+
+;play text table V
+2556cf0: 02556b34
+2556cf8: 02556B40
+2556d00: 02556B4C
+2556d08: 02556B58
+2556d10: 02556B64
+2556d18: 02556B70
+2556d20: 02556B7C
+2556d28: 02556B7C
+2556d30: 02556B88
+2556d38: 02556B94
+2556d40: 02556BA0
+2556d48: 02556BAC
+2556d50: 02556BB8
+2556d58: 02556BC4
+2556d60: 02556BD0
+2556d68: 02556BDC
+2556d70: 02556BE8
+2556d78: 02556BF4
+2556d80: 02556BF4
+2556d88: 02556C00
+2556d90: 02556C0C
+2556d98: 02556C18
+2556da0: 02556C24
+2556da8: 02556C30
+2556db0: 02556C3C
+2556db8: 02556C48
+2556dc0: 02556C54
+2556dc8: 02556C60
+2556dd0: 02556C6C
+2556dd8: 02556C78
+2556de0: 02556C84
+2556de8: 02556C90
+
+;=======================================
+;outdoors sale texts V
+;=======================================
+
+;outdoor bus item sold text
+254D410: 11,"KEEP IT IN<"  ;れいぞうこにいれておいて[LF]
+         13,"YOUR★FRIDGE♪" ;ね★おいしくめしあがれ♪
+
+;outdoor bus get music cafe coupon
+254D444: 10,"TAKE THIS<"   ;これを♪カフェ♪にもって[LF]
+         13,"♪CAFE♪COUPON" ;きて!オマケするわよ★
+
+;outdoor bus get restaurant coupon
+254D460: 10,"HERE…HAVE<"   ;レストランでやすくなる[LF]
+         13,"THIS COUPON♪" ;クーポンをあげるわ♪
+
+;specific item request
+
+;old guy ask for item text (relocated unused birthday text)
+2555E92: 17,"…DO<YOU HAVE IT?"
+254D69C: 02555E92
+
+;cowgirl ask for item text
+2555EA3: 17,"…I<REALLY WANT!"
+254D6B8: 02555EA3
+
+;helmet guy ask for item text
+2555EB4: 17,"…I<REALLY LIKE!"
+254D6D4: 02555EB4
+
+;old guy ask for inteligence item
+254D488: 12,"SELLING ANY<" ;あたまがよくなるおどうぐ[LF]
+         15,"SMART TOYS?"  ;をさがしているんじゃが?
+
+;old guy ask for style item
+254D4A4: 12,"CAN I BUY A<" ;おしゃれなおどうぐを[LF]
+         13,"STYLISH TOY?" ;さがしているんじゃが?			(+1 for terminator)
+
+;old guy ask for charisma item
+254D4BD: 12,"SELLING ANY<" ;ステキなおどうぐ[LF]
+         11,"COOL TOYS?"   ;をさがしているんじゃが?
+254D6A8: 0254D4BD          ;relocate +1
+
+;old guy ask for strength item
+254D4D4: 12,"SELLING ANY<" ;ちからがつくおどうぐを[LF]
+         12,"POWER TOYS?"  ;さがしているんじゃが?
+
+;old guy ask for gourmet item
+254D4EC: 12,"CAN I BUY A<" ;グルメなおどうぐ[LF]
+         13,"GOURMET TOY?" ;をさがしているんじゃが?		(+1 overwrites 1st char original old guy bonus item text)
+
+;old guy bonus item text (relocate)
+2555EC5: 12,"THIS GARDEN<"   ;このにわはせかいいち[LF]
+         12,"IS VERY NICE"   ;のにわだぞい!
+254D6B4: 02555EC5            ;relocate
+
+
+;cow girl intelligenge item
+254D524: 11,"SELL SMART<"   ;かしこくみえるようふくか[LF]
+         17,"WEARABLES?"    ;アクセのオススメあるー?
+
+;cow girl stylish item
+254D540: 10,"I♥STYLISH<"    ;おしゃれなようふくか[LF]
+         14,"WEARABLES!"    ;アクセのオススメあるー?
+
+;cow girl charisma item
+254D558: 12,"I LIKE COOL<"  ;カリスマせいバツグンの[LF]
+         16,"WEARABLES!"    ;ようふくかアクセあるー?
+
+;cow girl strength item
+254D574: 12,"I♥POWERFULL<"  ;ちからみなぎるようふくか[LF]
+         16,"WEARABLES!"    ;アクセのオススメあるー?
+
+;cow girl gourmet item
+254D590: 13,"SELL CUISINE<" ;グルメっぽいようふくか[LF]
+         15,"WEARABLES?"    ;アクセのオススメあるー?
+
+;cowgirl bonus item text (relocate)
+2555EDD: 12,"I LIKE YOUR<"   ;ガーデニング[LF]
+         10,"GARDEN★★★"     ;ちょースゴーい★★★
+254D6D0: 02555EDD            ;relocate
+
+
+;helmet guy intelligence item
+254D5D0: 12,"YOU SELL ANY" ;あたまがよくなるオススメ[LF]
+         12,"SMART FOOD?"  ;りょうりはあるかい?
+
+;helmet guy style item
+254D5E8: 12,"SELL ME SOME" ;おしゃれなオススメ[LF]
+         13,"STYLISH FOOD" ;りょうりはあるかい?		(+1 for terminator)
+
+;helmet guy charisma item
+254D601: 10,"I♥ BUYING<"  ;みんなににんきのオススメ[LF]
+         13,"POPULAR FOOD" ;りょうりはあるかい?		
+254D6E0: 0254D601		   ;relocate +1
+
+;helmet guy strength item
+254D618: 12,"I COULD USE<" ;ちからがでるオススメ[LF]
+         12,"POWER FOOD!"  ;りょうりはあるかい?
+
+;helmet guy gourmet item
+254D630: 13,"YOU SELL ANY<" ;おいしさバッチリなオスス[LF]
+         15,"TASTY FOOD?"   ;メりょうりはあるかい?
+
+;helmet guy bonus item text (fits,no relocate)
+254D64C: 13,"THIS GARDEN…<" ;こ､このにわは…![LF]
+         10,"IS…GREAT!"     ;なんと…すばらしい…
+
+;(2555EF3-2555FE7: free, unused birthday text)
+
+;=======================================
+;Item  names V
+;=======================================
+
+0238005E: > "HELMET"    ;ヘルメット
+02380B9E: > "HEADBAND"  ;ヘアバンド
+023816D6: > "CROWN"     ;ジュエルクラウン
+02382216: > "GLASSES"   ;おしゃれメガネ
+02382D56: > "TIARA♥"    ;ひめ♥ティアラ
+02383896: > "CHEF HAT"  ;コックぼうし
+023843BE: > "MAID BAND" ;メイドカチュ
+02384EEE: > "SILK HAT"  ;シルクハット
+02385A2A: > "RIBBON"    ;フリルリボン
+0238656A: > "CAT HAT"   ;ねこっちぼうし
+023870AA: > "GUARD HAT" ;パトロールぼう
+02387BEA: > "DEPA HAT"  ;たまデパぼう
+02388722: > "CAFE BAND" ;カフェアクセ
+02389262: > "ECO CAR"   ;エコカー
+02389A42: > "ECO SCOOP" ;エコスコップ
+02389E72: > "ECO BAG"   ;エコバッグ
+0238A506: > "BINOCULAR" ;そうがんきょう
+0238AE46: > "COMPUTER"  ;パソコン
+0238B636: > "MIRROR"    ;てかがみ
+0238B932: > "SEW SET"   ;さいほうセット
+0238BFE2: > "SEW TOOL"  ;ミシン
+0238C8BA: > "KARAOKE"   ;カラオケ
+0238CF76: > "CLAPBOARD" ;カチンコ
+0238D606: > "COOK BOOK" ;りょうりぼん
+0238DDCE: > "★BALL"     ;ゴムボール
+0238E646: > "MUSIC"     ;がくふ
+0238EFEE: > "FLUTE"     ;フルート
+0238F86A: > "MAKEーUP"   ;ビューティセット
+0238FE8A: > "TRIM SET"  ;トリミングセット
+02390E52: > "PLUSH TOY" ;パッチぬいぐるみ
+0239135E: > "ROBOT"     ;ロボット
+02391796: > "MOCHI SET" ;うすときね
+023928FA: > "ANTIQUES"  ;こっとうひん
+02392FA2: > "BIG BALL"  ;バランスボール
+023939C2: > "JOURNAL"   ;たびのおもいで
+023949AE: > "REGISTER"  ;レジ
+02395052: > "HANGER"    ;ハンガー
+02395822: > "CART"      ;リアカー
+02395FF6: > "FIREWORKS" ;はなびセット
+02396612: > "MODELSHIP" ;ボトルシップ
+02396E12: > "STYLE BAG" ;オシャレボックス
+023976F6: > "BEACHBALL" ;ビーチボール
+02397F72: > "KIRA♥BAG"  ;ゆめキラバッグ
+0239826E: > "SUN PANEL" ;たいようでんち
+02399232: > "STAMP"     ;スタンプ
+02399536: > "NORMAL"    ;ふつうのリビング
+0239A862: > "NORMAL"    ;ふつうのキッチン
+0239BB8E: > "NORMAL"    ;ふつうのトイレ
+0239CEBA: > "NORMAL"    ;ふつうのおふろ
+0239E1E6: > "NORMAL"    ;ふつうのしんしつ
+0239F512: > "SPACE"     ;うちゅうリビング
+023A083E: > "SPACE"     ;うちゅうキッチン
+023A1B6A: > "SPACE"     ;うちゅうトイレ
+023A2E96: > "SPACE"     ;うちゅうおふろ
+023A41C2: > "SPACE"     ;うちゅうしんしつ
+023A54EE: > "JEWEL"     ;ジュエルリビング
+023A681A: > "JEWEL"     ;ジュエルキッチン
+023A7B46: > "JEWEL"     ;ジュエルトイレ
+023A8E72: > "JEWEL"     ;ジュエルおふろ
+023AA19E: > "JEWEL"     ;ジュエルしんしつ
+023AB4CA: > "SEASHELL"  ;かいがらリビング
+023AC7F6: > "SEASHELL"  ;かいがらキッチン
+023ADB22: > "SEASHELL"  ;かいがらトイレ
+023AEE4E: > "SEASHELL"  ;かいがらおふろ
+023B017A: > "SEASHELL"  ;かいがらしんしつ
+023B14A6: > "CAVE"      ;どうくつリビング
+023B27D2: > "TARTAN"    ;タータンチェック
+023B3AFE: > "PARK"      ;こうえんリビング
+023B4E2A: > "LAB"       ;じっけんルーム
+023B6156: > "RAINBOW"   ;レインボーリビング
+023B747E: > "COUNTRY"   ;カントリーリビング
+023B87AA: > "SPOTTY"    ;まんまるリビング
+023B9AD2: > "CARDS"     ;トランプリビング
+023BADFE: > "CAMP"      ;キャンプリビング
+023BC12A: > "TAMA ST."  ;たまストリート
+023BD456: > "DONUTPARK" ;ドーナツこーえん
+023BE782: > "LAB COAT"  ;はくい
+023C0976: > "★SUIT"     ;スターいしょう
+023C2B7E: > "♥DRESS"    ;ふわふわワンピ
+023C4D82: > "DRESS"     ;シャープドレス
+023C6F6A: > "APRON"     ;エプロン
+023C9162: > "UNIFORM"   ;けいかんふく
+023CB336: > "DEPA WEAR" ;たまデパいしょう
+023CD53A: > "MAID WEAR" ;メイドふく
+023CF6D2: > "NORI RICE" ;のりごはん
+023CFB82: > "MAPO TOFU" ;マーボーどうふ
+023D004A: > "SOUP"      ;ミネストローネ
+023D0522: > "DX CURRY"  ;ぜいたくカレー
+023D09FE: > "STEAK"     ;ハンバーグステーキ
+023D0ED6: > "BENTO"     ;かいせきりょうり
+023D13AE: > "HAMBURGER" ;タワーバーガー
+023D187E: > "SAUSAGE"   ;ビッグソーセージ
+023D1D52: > "DX SOUP"   ;コラーゲンスープ
+023D221A: > "INARI"     ;いなりずし
+023D26EE: > "SPAGETTI"  ;ミートスパゲティ
+023D2BB6: > "RAMEN"     ;ガッツリラーメン
+023D308A: > "BARBECUE"  ;バーべキュー
+023D3552: > "RED RICE"  ;キムチチャーハン
+023D3A22: > "SPACEFOOD" ;うちゅうしょく
+023D3EE2: > "SHUMAI"    ;ほかほかシュウマイ
+023D43AA: > "CARROTS"   ;ふたまたにんじん
+023D4862: > "TOMATO"    ;たいようトマト
+023D4D26: > "MOP"       ;モップ
+023D5022: > "VACUUM"    ;そうじき
+023D5322: > "BROOM"     ;デッキブラシ
+023D561E: > "COUPON"    ;レストランクーポン
+023D5862: > "♪COUPON♪"  ;♪カフェ♪クーポン
+023D5AA6: > "NUTS"      ;ナッツ
+023D5F66: > "★CANDY"    ;★キャンディ
+023D642A: > "DRINK♥"    ;えいよう♥ドリンク
+023D68E2: > "ROSE TEA"  ;ローズヒップティー
+023D6DA6: > "SHERBET"   ;シャーベット
+023D726A: > "KUZUMOCHI" ;くずもち
+023D773A: > "PUDDING"   ;ドリームプリン
+023D7C02: > "KIRA☼CAKE" ;キラキラケーキ
+023D80D2: > "CREPE"     ;ミルクレープ
+023D859A: > "APPLE PIE" ;アップルパイ
+023D8A5A: > "ICECOFFEE" ;アイスコーヒー
+023D8F1E: > "PANCAKES"  ;ハニーパンケーキ
+023D93E2: > "DONUTS"    ;ドーナツ
+023D98BE: > "BEANS"     ;あまなっとう
+023D9D92: > "CARAMEL"   ;キャラメル
+023DA242: > "BANANA"    ;バニラチョコバナナ
+023DA70A: > "PRETZEL"   ;プレッツェル
+023DABBA: > "JELLY"     ;フルーツゼリー
+023DB082: > "ICE CREAM" ;ぼくじょうソフト
+023DB53A: > "CHEESE"    ;できたてチーズ
+023DB9DE: > "MELON"     ;スイカ
+
+;curry,perfait,cake are part of cooking game
+023DC806: > "CURRY"     ;カレー
+023DCCCA: > "PARFAIT"   ;パフェ
+023DD192: > "CAKE"      ;てづくりケーキ
+;cooking game contains  (moved down here for checksum)
+023DBE96: > "RECIPES"   ;クッキングゲーム (cooking game)
+
+;Egg and rice fridge food (F1, not sure if used but included anyway) V
+025496B2: > "EGG&RICE" ;たまごかけごはん
+;=======================================
+;Diary texts V
+;=======================================
+
+;disable diary text space removal V
+241cbfc: 0000
+
+;all texts have 6 lines of 6 characters.
+;Note long whitespace in original texts will be replaced with (object)name.
+;These texts will be moved to EP004
+
+;2558370:           ; 1        &     でウキウキ!         をつくったよ♥♥♥
+;2558398:           ; 2        &     であそんだよ!        でだいしっぱい↓
+;25583C0:           ; 3   みんなで        をしたら……         ができたよ!♥♥♥
+;25583E8:           ; 4   みんなで        をしたら…だいしっぱい↓つぎはがんばろうね@
+;2558410:           ; 5   みんなで        をしたら……         ができちゃった!♥
+;2558438:           ; 6   みんなで        をしたら…だいしっぱい↓つぎはがんばろうね@
+;2558460:           ; 7        &     でウキウキ!!        ､ハラハラしたね～♪
+;2558488:           ; 8        と     はなかよしだね♪        ､たのしかった～@
+;25584B0:           ; 9        &     でワクワク!!        ､またやりたいな～↑
+;25584D8:           ;10   みんなで        をしたよ!とてもドキドキしたね!またやりたいな♪
+;2558500:           ;11   みんなで        をしたよ!とてもたのしかったな～!またやろうね♪
+;2558528:           ;12   みんなで        をしたよ!とてもハッピーなじかんをすごせたね♪♪
+;2558550:           ;13       と     はなかよしだね↑         をたべたよ～@
+;2558578:           ;14       &     でワクワク★★こうえんのアスレチックたのしかった↑
+;25585A0:           ;15       &     であそんだよ!すなのおやまがたくさんできたね～↑↑
+;25585C8:           ;16       &     でウキウキ!♪すべりだい､スイスイきもちいい～♥
+;25585F0:           ;17       と     はなかよしだね★がっこうでべんきょうがんばったよ!
+
+2558618: 6,"WE HAD" ;18  ほいくえんへいったよ!せんせいのかみしばいはいつもとってもたのしいな♪
+         6,"PICTUR"
+         6,"E STOR"
+         6,"IES AT"
+         6,"SCHOOL"
+         6,"♪     "
+
+;2558640:           ;19  ほいくえんでみんなでおえかきしたよ♪     にもみせてあげたいな♥
+;2558668:           ;20       &     であそんだよ♪おふろにはいってきもちよかった～♥♥
+;2558690:           ;21        と     はおもしろい☼ふたりいっしょだと2ばいたのしいね↑
+;25586B8:           ;22        や     といっしょだとたのしいね♪たくさんわらったな～♪♪
+;25586E0:           ;23        の         といっしょにおにわではしゃいじゃったな～♪
+
+2558708: 6,"MILD  " ;24  こうえんパトロールのおしごとをしたよ!きょうもこうえんはへいわだったよ♪
+         6,"PARK  "
+         6,"PATROL"
+         6,"LING  "
+         6,"TODAY♪"
+         6,"      "
+
+2558730: 6,"TOOK A" ;25  こうえんパトロールのおしごと!まいごのこをおうちにつれていってあげたの!
+         6,"LOST C"
+         6,"HILD H"
+         6,"OME FR"
+         6,"OM THE"
+         6,"PARK! "
+
+2558758: 6,"BUSY  " ;26  こうえんパトロールのおしごとをしたよ!たくさんあるいてすこしつかれたな@
+         6,"DAY AT"
+         6,"THE   "
+         6,"PARK! "
+         6,"IM SO "
+         6,"TIRED@"
+
+2558780: 6,"MANY  " ;27  たまデパでおしごとをしたよ!いっぱいおきゃくさんがきてくれてうれしいな♪
+         6,"CUSTOM"
+         6,"ERS AT"
+         6,"TAMA  "
+         6,"DEPA  "
+         6,"TODAY♪"
+
+25587A8: 6,"LOTS O" ;28  たまデパでおしごとをしたよ!かわいいおどうぐにかこまれてたのしかったよ♪
+         6,"F CUTE"
+         6,"ITEMS "
+         6,"IN THE"
+         6,"STORE♪"
+		 6,"      "
+
+25587D0: 6,"SOLD  " ;29  たまデパでおしごとをしたよ!たくさんうれたけどすこしつかれちゃったなぁ…
+         6,"MANY  "
+         6,"ITEMS,"
+         6,"IT WAS"
+         6,"EXHAUS"
+         6,"TING. "
+
+25587F8: 6,"MANY  " ;30  たまもりショップでおしごとをしたよ★いっぱいおきゃくさんがきてくれたよ♪
+         6,"CUSTOM"
+         6,"ERS AT"
+         6,"TAMA  "
+         6,"MORI★ "
+         6,"TODAY♪"
+
+2558820: 6,"EVERY-" ;31  たまもりショップでおしごとをしたよ★みんなおしゃれをしておでかけしてね♪
+         6,"ONE   "
+         6,"SHOP- "
+         6,"PED★TO"
+         6,"DRESSー"
+         6,"UP♪   "
+
+2558848: 6,"IM  BE" ;32  たまもりショップでおしごとをしたよ!じょうずにたまもりができたんだ～★
+         6,"COMING"
+         6,"A FASH"
+         6,"ION   "
+         6,"GURU～★"
+         6,"      "
+
+2558870: 6,"I HAD " ;33  ミュージックカフェでおしごとをしたよ!おきゃくさんでおおにぎわいだった♪
+         6,"A VERY"
+         6,"BUSY  "
+         6,"DAY AT"
+         6,"THE   "
+         6,"♪CAFE♪"
+
+2558898: 6,"EVERY-" ;34  ミュージックカフェでおしごとをしたよみんなたのしくおしゃべり♪またきてね
+         6,"ONE IS"
+         6,"HAVING"
+         6,"FUN♪  "
+         6,"AT THE"
+         6,"♪CAFE♪"
+
+25588C0: 6,"I HAD " ;35  ミュージックカフェでおしごとをしたよおさらをわっちゃってだいしっぱい…!
+         6,"TOO   "
+         6,"MANY  "
+         6,"DISHES"
+         6,"TO    "
+         6,"WASH! "
+
+25588E8: 6,"STUDY-" ;36  きょうはロボットのぎじゅつについてべんきょうしたよ!むずかしかったな～@
+         6,"ING RO"
+         6,"BOT TE"
+         6,"CHNOLO"
+         6,"GY.ITS"
+         6,"HARD～@"
+
+2558910: 6,"STUDIE" ;37  きょうはロボットのしくみについてべんきょうしたよ!きかいってふしぎだね↑
+         6,"D ROBO"
+         6,"T MECH"
+         6,"ANISM."
+         6,"INTERE"
+         6,"STING…"
+
+2558938: 6,"WE BUI" ;38  きょうはがっこうでロボットをつくってきたよ!きかいっておくがふかいなぁ★
+         6,"LT A  "
+         6,"ROBOT!"
+         6,"WE HAD"
+         6,"SO MUC"
+         6,"H FUN★"
+
+;2558960:           ;39  がっこうでロボットをつくったよ!         もがんばってたよ☼
+
+2558988: 6,"WE HAD" ;40  きょうはとつぜんロボットづくりのテスト!びっくりしたけどがんばったよ↑
+         6,"A ROBO"
+         6,"T MAKI"
+         6,"NG TES"
+         6,"T!GOOD"
+         6,"LUCK↑ "
+
+25589B0: 6,"PRACTI" ;41  きょうはがっこうでヘアカットのれんしゅうをしたよ!むずかしかったな～@
+         6,"CED DO"
+         6,"ING HA"
+         6,"IRCUTS"
+         6,"IN CLA"
+         6,"SS～@  "
+
+25589D8: 6,"PRACTI" ;42  きょうはがっこうでシャンプーのれんしゅうをしたよ!たのしかったな↑↑
+         6,"CED SH"
+         6,"AMPOOー"
+         6,"ING IN"
+         6,"CLASS↑"
+         6,"      "
+
+2558A00: 6,"LEARNー" ;43  きょうはがっこうでメイクのべんきょうをしたよ!はやくじょうたつしたいな★
+         6,"ING   "
+         6,"TO DO "
+         6,"MAKEー"
+         6,"UPS   "
+         6,"FAST★ "
+
+;2558A28:           ;44  きょうはヘアカットのれんしゅう!         もがんばっていたよ♪♪
+
+2558A50: 6,"HOW   " ;45  きょうはとつぜんヘアカットのテスト!いままでのせいかをはっきできたかな?
+         6,"DID I "
+         6,"DO ON "
+         6,"THE HA"
+         6,"IRCUT "
+         6,"TEST? "
+
+2558A78: 6,"PRACTI" ;46  がっこうでミシンのれんしゅうをしたよ!はやくステキなふくをつくりたいな♪
+         6,"CE ON "
+         6,"THE DR"
+         6,"ESSMAK"
+         6,"ING MA"
+         6,"CHINE♪"
+
+2558AA0: 6,"STUDIE" ;47  がっこうでししゅうのべんきょうをしたよ!いろんなぬいかたがあるんだね♪
+         6,"D SOME"
+         6,"EMBROI"
+         6,"DERY  "
+         6,"TODAY♪"
+         6,"      "
+
+2558AC8: 6,"LEARNー"  ;48  がっこうでさいほうどうぐについてべんきょうしたよ!いろんなものがあるね@
+         6,"ING   "
+         6,"USING "
+         6,"THE   "
+         6,"SEWING"
+         6,"KIT@  "
+
+;2558AF0:            ;49  きょうはミシンでシャツをつくったよ!         はセンスあるなぁ★
+
+2558B18: 6,"DRESSー" ;50  きょうはとつぜんようふくづくりのテスト!じょうずにたいおうできたよ♪♪
+         6,"MAKING"
+         6,"TEST! "
+         6,"I DID "
+         6,"VERY  "
+         6,"WELL♪♪"
+
+2558B40: 6,"DRYER " ;51  がっこうでドライヤーのれんしゅうをしたよ!かげんがむずかしいなぁ@
+         6,"PRACTI"
+         6,"CE AND"
+         6,"MATH  "
+         6,"ARE   "
+         6,"HARD@ "
+
+2558B68: 6,"LEARNE" ;52  きょうはブラシのつかいかたをべんきょうしたよ!みんなをキレイにしたいな♥
+         6,"D USIN"
+         6,"G BRUS"
+         6,"HES IN"
+         6,"CLASS♥"
+         6,"      "
+
+2558B90: 6,"I GROO" ;53  きょうはたまペットのトリミングをしてあげたよ!ピカピカにしてあげたんだ♪
+         6,"MED SO"
+         6,"ME CUT"
+         6,"E TAMA"
+         6,"PETS  "
+         6,"TODAY♪"
+
+;2558BB8:           ;54  がっこうでトリミングをしたよ!         はてさきがきようだなぁ@
+
+2558BE0: 6,"I DID " ;55  きょうはとつぜんトリミングのテスト!かわいくできあがってハッピー♥♥♥
+         6,"GREAT "
+         6,"ON THE"
+         6,"TRIMMI"
+         6,"NG  TE"
+         6,"ST♥♥♥ "
+
+2558C08: 6,"VAULTI" ;56  がっこうでとびばこのれんしゅう★たかいだんがとべるようにがんばろう!!!
+         6,"NG PRA"
+         6,"CTICE★"
+         6,"LETS  "
+         6,"GO DO "
+         6,"THIS!!"
+
+2558C30: 6,"GREAT " ;57  がっこうでバスケのしあいをしたよ!シュートをきめてだいかつやく↑↑↑
+         6,"BASKET"
+         6,"BALL  "
+         6,"GAME  "
+         6,"TODAY!"
+         6,"↑↑↑   "
+
+2558C58: 6,"YEAH!I" ;58  がっこうで100たまMのタイムをはかったよ!しんきろくがでてうれしい↑
+         6,"BROKE "
+         6,"A NEW "
+         6,"TIME  "
+         6,"RECORD"
+         6,"!!!   "
+
+;2558C80:           ;59  きょうはスポーツかのじゅぎょう★         にはまけるもんか～～!
+
+2558CA8: 6,"VAULTー" ;60  きょうはとびばこのテスト!きんちょうしたけど､がんばってとんだよ☼☼
+         6,"ING   "
+         6,"TEST! "
+         6,"DONT  "
+         6,"BE NER"
+         6,"VOUS☼☼"
+
+2558CD0: 6,"HAD A " ;61  がっこうでえんぎのれんしゅう!うまくえんじるのってむずかしいなぁ…@
+         6,"ACTING"
+         6,"WORKー "
+         6,"SHOP  "
+         6,"IN THE"
+         6,"CLASS…"
+
+2558CF8: 6,"LEARNE" ;62  がっこうでうたとおどりのレッスン♪ステキなアイドルになるためにがんばろ!
+         6,"D HOW "
+         6,"TO DAN"
+         6,"CE LIK"
+         6,"E MY  "
+         6,"IDOL! "
+
+2558D20: 6,"DAILY " ;63  がっこうでうたとおどりのレッスン♪ひびのつみかさねがだいせつなんだね↑
+         6,"DANCE "
+         6,"PRACTI"
+         6,"CE IS "
+         6,"IMPORT"
+         6,"ANT♪  "
+
+;2558D48:           ;64  きょうはダンスのれんしゅう!         のダンスはキレがあるね♪
+
+2558D70: 6,"DANCE " ;65  きょうはダンスのテスト★きんちょうしたけど､おもいっきりおどれたよ!!
+         6,"TEST  "
+         6,"TODAY★"
+         6,"WISH M"
+         6,"E GOOD"
+         6,"LUCK!!"
+
+2558D98: 6,"DANCE " ;66  がっこうでうたとおどりのレッスン♪たのしくできてノリノリハッピー♥♥♥
+         6,"AND SI"
+         6,"NGING "
+         6,"LESSON"
+         6,"TODAY♥"
+         6,"      "
+
+2558DC0: 6,"PRACTI" ;67  がっこうではっせいれんしゅう!ステキなこえがでるようにとっくんしなきゃ♪
+         6,"CED SI"
+         6,"NGING "
+         6,"IN    "
+         6,"CLASS "
+         6,"TODAY♪"
+
+2558DE8: 6,"EVERYー" ;68  きょうはみんなでがっしょうしたよ!きれいにハモれるときもちがいいね♪♪
+         6,"ONE   "
+         6,"SANG  "
+         6,"IN HAR"
+         6,"MONY♪♪"
+         6,"      "
+
+;2558E10:           ;69  きょうはうたのれんしゅうをしたよ♪         のこえにかんどう…!
+
+2558E38: 6,"READY " ;70 きょうはうたのテスト!ドキドキしたけど､せんせいにもほめてもらえたよ♪
+         6,"FOR A "
+         6,"SINGIN"
+         6,"G TEST"
+         6,"IN SCH"
+         6,"OOL♪  "
+
+2558E60: 6,"COOKED" ;71 きょうはちょうりじっしゅうでカレーをつくったよ!おいしくできたんだ～♥
+         6,"DELIー "
+         6,"CIOUS "
+         6,"CURRY "
+         6,"IN CLA"
+         6,"SS～♥  "
+
+2558E88: 6,"BAKED " ;72 きょうはちょうりじっしゅうでケーキをつくったよ!かわいくできたよね～♪
+         6,"A YUMM"
+         6,"Y CAKE"
+         6,"IN    "
+         6,"CLASS～"
+         6,"♪     "
+
+2558EB0: 6,"WE ARE" ;73 がっこうでちょうりじっしゅう!つまみぐいをしておなかいっぱいに…☼
+         6,"STUFFE"
+         6,"D AFTE"
+         6,"R COOK"
+         6,"ING A "
+         6,"LOT…☼ "
+
+;2558ED8:           ;74 きょうはりょうりかのじゅぎょう!         にはまけられないの★
+
+2558F00: 6,"COOKIN" ;75 きょうはりょうりのテスト★じょうずにできたからせんせいにほめられたよ!!
+         6,"G EXAM"
+         6,"TODAY★"
+         6,"IM REA"
+         6,"DY FOR"
+         6,"IT!!  "
+
+;=======================================
+; profile input (code hack)
+;=======================================
+
+;profile input increment char V
+2527350: c003 6872 ;xcmp  %r2,0xC7 ;last kana+1
+2527356: c003 6E02 ;xld.w %r2,0xE0 ;skip to A
+252735a: c003 6B92 ;xcmp  %r2,0xF9 ;Z last valid char
+
+;profile input decrement char (F2-36E) V
+2527366: c003 69F2 ;xcmp  %r2,0xDF ;1st junk char before char A
+252736C: c003 6C62 ;xld.w %r2,0xC6 ;skip to last kana
+2527374: c003 6F92 ;xld.w %r2,0xF9 ;rollover to last alpha char Z
+
+;add english font support to profile input code part 2 (F2: 2528180)
+2527E12: c000 c000 1eb9 ;xjp 0x02527f88 (F2: 0x025282F6)
+
+;add english font support to profile input code part 1
+2527F88: 6414 ; sub      %r4,0x1 
+         a548 ; ld.ub    %r8,%r4         
+         c050 ;
+         6fa4 ; xld.w    %r4,0x143a (F2: 0x143e)
+         2446 ; ld.ub    %r6,[%r4]         
+         c001 ;
+         6e87 ; xld.w    %r7,0x68         
+         c044 ;          
+         c187 ;          
+         6f09 ; xld.w    %r9,0x22061f0         
+         c001 ;          
+         68f8 ; xcmp     %r8,0x4f         
+         0e21 ; jrle     0x02527FE2 (F2: 0x02528350)
+         c044 ;
+         c25a ;
+         6c89 ; xld.w    %r9,0x2209688         
+         c001 ;
+         6508 ; xsub     %r8,0x50         
+         69a8 ; cmp      %r8,0x1a         
+         0e1a ; jrle     0x02527FE2 (F2: 0x02528350)
+         c044 ;
+         c167 ;
+         6f09 ; xld.w    %r9,0x22059f0         
+         65c8 ; sub      %r8,0x1c         
+         6898 ; cmp      %r8,0x9         
+         0e14 ; jrle     0x02527FE2 (F2: 0x02528350)
+         64a8 ; sub      %r8,0xa         
+         a588 ; ld.ub    %r8,%r8         
+         c001 ;
+         68f8 ; xcmp     %r8,0x4f         
+         0e0c ; jrle     0x02527FDC (F2: 0x0252834A)
+         c044 ;
+         c300 ;
+         6d09 ; xld.w    %r9,0x220c010         
+         c001 ;
+         6698 ; xsub     %r8,0x69         
+         a588 ; ld.ub    %r8,%r8         
+         6998 ; cmp      %r8,0x19         
+         0e07 ; jrle     0x02527FE2 (F2: 0x02528350)
+         c000 ;
+         c000 ;
+         1e9c ; xjp      0x02528112 (F2: 0x02528480)
+		 
+;-------------------------------------------------------------------------------
